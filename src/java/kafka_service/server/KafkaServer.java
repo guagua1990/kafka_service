@@ -1,4 +1,4 @@
-package com.liveramp.kafka_service.server;
+package kafka_service.server;
 
 import java.io.IOException;
 
@@ -6,9 +6,6 @@ import kafka.server.AbstractFetcherManager;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 import org.apache.zookeeper.server.quorum.QuorumPeerMain;
 
-/**
- * Created by yjin on 1/22/15.
- */
 public class KafkaServer {
 
   private AbstractFetcherManager manager;
