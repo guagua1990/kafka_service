@@ -1,31 +1,20 @@
+#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
 # The ASF licenses this file to You under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# the directory where the snapshot is stored.
-dataDir=/tmp/zookeeper/data
-# the port at which the clients will connect
-clientPort=2181
-# the directory the transaction log is stored
-dataLogDir=/tmp/zookeeper/log
-# the number of ticks that the initial synchronization phase can take
-initLimit=10
-# the number of ticks that can pass between sending a request and getting an acknowledgement
-syncLimit=5
 
-# ZooKeeper server and its port no.
-# ZooKeeper ensemble should know about every other machine in the ensemble specify server id by creating 'myid' file in the dataDir
-# use hostname instead of IP address for convenient maintenance
-server.1=10.99.32.1:2888:3888
-server.2=10.99.32.14:2888:3888
-server.3=10.99.32.36:2888:3888
+if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
+    export KAFKA_HEAP_OPTS="-Xmx512M"
+fi
+exec $(dirname $0)/kafka-run-class.sh kafka.tools.ConsoleProducer $@

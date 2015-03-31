@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -12,20 +13,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# the directory where the snapshot is stored.
-dataDir=/tmp/zookeeper/data
-# the port at which the clients will connect
-clientPort=2181
-# the directory the transaction log is stored
-dataLogDir=/tmp/zookeeper/log
-# the number of ticks that the initial synchronization phase can take
-initLimit=10
-# the number of ticks that can pass between sending a request and getting an acknowledgement
-syncLimit=5
 
-# ZooKeeper server and its port no.
-# ZooKeeper ensemble should know about every other machine in the ensemble specify server id by creating 'myid' file in the dataDir
-# use hostname instead of IP address for convenient maintenance
-server.1=10.99.32.1:2888:3888
-server.2=10.99.32.14:2888:3888
-server.3=10.99.32.36:2888:3888
+if [ $# -lt 1 ];
+then
+	echo "USAGE: $0 zookeeper.properties"
+	exit 1
+fi
+base_dir=$(dirname $0)
+
+if [ "x$KAFKA_LOG4J_OPTS" = "x" ]; then
+    export KAFKA_LOG4J_OPTS="-Dlog4j.configuration=file:$base_dir/../config/log4j.properties"
+fi
+
+if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
+    export KAFKA_HEAP_OPTS="-Xmx512M -Xms512M"
+fi
+
+EXTRA_ARGS="-name zookeeper -loggc"
+
+COMMAND=$1
+case $COMMAND in
+  -daemon)
+     EXTRA_ARGS="-daemon "$EXTRA_ARGS
+     shift
+     ;;
+ *)
+     ;;
+esac
+
+exec $base_dir/kafka-run-class.sh $EXTRA_ARGS org.apache.zookeeper.server.quorum.QuorumPeerMain $@
+
