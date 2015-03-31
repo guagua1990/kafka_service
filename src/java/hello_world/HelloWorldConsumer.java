@@ -1,7 +1,6 @@
 package hello_world;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,6 @@ import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 
 public class HelloWorldConsumer extends Thread {
-  final static String clientId = "SimpleConsumerDemoClient";
   final static String TOPIC = "hello_world";
   ConsumerConnector consumerConnector;
 
@@ -26,7 +24,7 @@ public class HelloWorldConsumer extends Thread {
 
   public HelloWorldConsumer(){
     Properties properties = new Properties();
-    properties.put("zookeeper.connect","localhost:2181");
+    properties.put("zookeeper.connect","10.99.32.1:2181,10.99.32.1:2182,10.99.32.1:2183,10.99.32.1:2184,10.99.32.1:2185");
     properties.put("group.id","test-group");
     ConsumerConfig consumerConfig = new ConsumerConfig(properties);
     consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
