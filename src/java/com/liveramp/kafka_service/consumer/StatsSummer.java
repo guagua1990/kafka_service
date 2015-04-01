@@ -72,11 +72,7 @@ public class StatsSummer {
     return new TwoKeyTuple<Long, Long>(Long.parseLong(keys[0]), Long.parseLong(keys[1]));
   }
 
-  public List<String> emitStats() throws IOException {
-    String paragraph = getStatsJsonStrings();
-  }
-
-  private List<String> getStatsJsonStrings() throws JSONException {
+  public List<String> getStatsJsonStrings() {
     List<String> statJsonStrings = Lists.newArrayList();
 
     for (TwoKeyTuple<String, Long> keys : totalCountMap.key12Set()) {
@@ -100,5 +96,12 @@ public class StatsSummer {
       statJsonStrings.add(JsonFactory.createErrorCountEntry(twoKey1.getK1(), twoKey1.getK2(), twoKey2.getK1(), twoKey2.getK2(), errorCountMap.get(keys)));
     }
     return statJsonStrings;
+  }
+
+  public void clear() {
+    totalCountMap.clear();
+    valueMap.clear();
+    uniqueClickCountMap.clear();
+    errorCountMap.clear();
   }
 }

@@ -17,46 +17,58 @@ public class JsonFactory {
   public static final String COUNT = "count";
   public static final String CATEGORY_ENUM_ID = "category_enum_id";
 
-  public static String createTotalCountEntry(long jobId, long ircId, long fieldId, long count) throws JSONException {
+  public static String createTotalCountEntry(long jobId, long ircId, long fieldId, long count) {
     return createCountEntry(jobId, ircId, fieldId, count, StatsType.TOTAL_COUNT);
   }
 
-  public static String createTransactionValueEntry(long jobId, long ircId, long fieldId, double value) throws JSONException {
+  public static String createTransactionValueEntry(long jobId, long ircId, long fieldId, double value) {
     JSONObject json = new JSONObject();
-    json.put(JOB_ID, jobId);
-    json.put(IRC_ID, ircId);
-    json.put(FIELD_ID, fieldId);
-    json.put(COUNT, value);
-    JSONObject wrapper = new JSONObject().put(STATS_TYPE, StatsType.TRANSACTION_VALUE.name());
-    wrapper.put(STAT, json);
-    return wrapper.toString();
+    try {
+      json.put(JOB_ID, jobId);
+      json.put(IRC_ID, ircId);
+      json.put(FIELD_ID, fieldId);
+      json.put(COUNT, value);
+      JSONObject wrapper = new JSONObject().put(STATS_TYPE, StatsType.TRANSACTION_VALUE.name());
+      wrapper.put(STAT, json);
+      return wrapper.toString();
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  public static String createUniqClickCountEntry(long jobId, long ircId, long fieldId, long count) throws JSONException {
+  public static String createUniqClickCountEntry(long jobId, long ircId, long fieldId, long count) {
     return createCountEntry(jobId, ircId, fieldId, count, StatsType.UNIQ_CLICK_COUNT);
   }
 
-  public static String createErrorCountEntry(long jobId, long ircId, long fieldId, long categoryEnumId, long count) throws JSONException {
+  public static String createErrorCountEntry(long jobId, long ircId, long fieldId, long categoryEnumId, long count) {
     JSONObject json = new JSONObject();
-    json.put(JOB_ID, jobId);
-    json.put(IRC_ID, ircId);
-    json.put(FIELD_ID, fieldId);
-    json.put(CATEGORY_ENUM_ID, categoryEnumId);
-    json.put(COUNT, count);
-    JSONObject wrapper = new JSONObject().put(STATS_TYPE, StatsType.ERROR_COUNT.name());
-    wrapper.put(STAT, json);
-    return wrapper.toString();
+    try {
+      json.put(JOB_ID, jobId);
+      json.put(IRC_ID, ircId);
+      json.put(FIELD_ID, fieldId);
+      json.put(CATEGORY_ENUM_ID, categoryEnumId);
+      json.put(COUNT, count);
+      JSONObject wrapper = new JSONObject().put(STATS_TYPE, StatsType.ERROR_COUNT.name());
+      wrapper.put(STAT, json);
+      return wrapper.toString();
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  private static String createCountEntry(long jobId, long ircId, long fieldId, long count, StatsType type) throws JSONException {
+  private static String createCountEntry(long jobId, long ircId, long fieldId, long count, StatsType type) {
     JSONObject json = new JSONObject();
-    json.put(JOB_ID, jobId);
-    json.put(IRC_ID, ircId);
-    json.put(FIELD_ID, fieldId);
-    json.put(COUNT, count);
-    JSONObject wrapper = new JSONObject().put(STATS_TYPE, type.name());
-    wrapper.put(STAT, json);
-    return wrapper.toString();
+    try {
+      json.put(JOB_ID, jobId);
+      json.put(IRC_ID, ircId);
+      json.put(FIELD_ID, fieldId);
+      json.put(COUNT, count);
+      JSONObject wrapper = new JSONObject().put(STATS_TYPE, type.name());
+      wrapper.put(STAT, json);
+      return wrapper.toString();
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }
