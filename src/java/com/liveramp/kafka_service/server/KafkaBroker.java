@@ -23,12 +23,19 @@ public class KafkaBroker {
   }
 
   public static void main(String[] args) {
-    KafkaBroker broker = KafkaBrokerBuilder.create()
+    final KafkaBroker broker = KafkaBrokerBuilder.create()
         .setZookeeperConnect("10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181")
         .setPort(9092)
         .setDeleteTopicEnable(true)
         .setLogDirs("/tmp/kafka-logs")
         .build();
-    broker.start();
+
+    Thread thread = new Thread() {
+      @Override
+      public void run() {
+        broker.start();
+      }
+    };
+    thread.run();
   }
 }
