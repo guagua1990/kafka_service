@@ -43,7 +43,7 @@ public class KafkaTopicHelper {
         "--replication-factor", String.valueOf(replicationFactor)
     };
     TopicCommand.TopicCommandOptions options = new TopicCommand.TopicCommandOptions(arguments);
-    System.out.println(Joiner.on(" ").join(arguments));
+
     try {
       TopicCommand.createTopic(zookeeperClient.get(), options);
     } catch (TopicExistsException e) {
