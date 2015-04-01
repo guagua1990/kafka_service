@@ -35,7 +35,7 @@ public class ZookeeperServerBuilder {
     return setProperty("syncLimit", syncLimit);
   }
 
-  public ZookeeperServerBuilder setServer(String name, String address) {
+  public ZookeeperServerBuilder addServer(String name, String address) {
     return setProperty("server." + name, address);
   }
 
