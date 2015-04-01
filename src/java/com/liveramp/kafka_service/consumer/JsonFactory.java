@@ -1,4 +1,4 @@
-package kafka_service.consumer;
+package com.liveramp.kafka_service.consumer;
 
 
 import org.json.JSONException;
