@@ -7,13 +7,14 @@ import com.rapleaf.support.DayOfYear;
 
 public class ScheduledNotifier {
 
-  public static final long INTERVAL = 50 * 1000;
+  public final long interval;
 
   private final Thread targetThread;
   private final Timer timer;
 
-  public ScheduledNotifier(Thread thread) {
+  public ScheduledNotifier(Thread thread, long interval) {
     this.targetThread = thread;
+    this.interval = interval;
     timer = new Timer(true);
   }
 
@@ -23,7 +24,7 @@ public class ScheduledNotifier {
       public void run() {
         targetThread.interrupt();
       }
-    }, DayOfYear.today().toMillis(), INTERVAL);
+    }, DayOfYear.today().toMillis(), interval);
   }
 
   public void cancel() {
