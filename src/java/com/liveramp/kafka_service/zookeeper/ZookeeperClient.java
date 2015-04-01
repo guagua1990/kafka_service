@@ -26,39 +26,39 @@ public class ZookeeperClient {
     return zkClient;
   }
 
-  public static class ZookeeperClientBuilder {
+  public static class Builder {
     private String connection;
     private int sessionTimeout;
     private int connectionTimeout;
 
-    private ZookeeperClientBuilder(String connection) {
+    private Builder(String connection) {
       this.connection = connection;
       this.sessionTimeout = DEFAULT_SESSION_TIMEOUT_MILLIS;
       this.connectionTimeout = DEFAULT_CONNECTION_TIMEOUT_MILLIS;
     }
 
-    public static ZookeeperClientBuilder from(String connection) {
-      return new ZookeeperClientBuilder(connection);
+    public static Builder from(String connection) {
+      return new Builder(connection);
     }
 
-    public ZookeeperClientBuilder setSessionTimeout(int sessionTimeout) {
+    public Builder setSessionTimeout(int sessionTimeout) {
       this.sessionTimeout = sessionTimeout;
       return this;
     }
 
-    public ZookeeperClientBuilder setConnectionTimeout(int connectionTimeout) {
+    public Builder setConnectionTimeout(int connectionTimeout) {
       this.connectionTimeout = connectionTimeout;
       return this;
     }
 
-    public ZookeeperClient create() {
+    public ZookeeperClient build() {
       return new ZookeeperClient(connection, sessionTimeout, connectionTimeout);
     }
   }
 
   public static void main(String[] args) {
-    ZookeeperClient zookeeperClient = ZookeeperClientBuilder
+    ZookeeperClient zookeeperClient = Builder
         .from("10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181")
-        .create();
+        .build();
   }
 }
