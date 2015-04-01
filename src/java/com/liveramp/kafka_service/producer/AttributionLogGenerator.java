@@ -11,10 +11,11 @@ import com.rapleaf.spruce_lib.log.SpruceLogEntry;
 
 public class AttributionLogGenerator {
 
+  public static final String GOOD_REQUEST_CATEGORY = "attribution_requests";
+  public static final String BAD_REQUEST_CATEGORY = "attribution_bad_requests";
+
   public static class AttributionLogBuilder extends SpruceLogEntry {
 
-    public static final String GOOD_REQUEST_CATEGORY = "attribution_requests";
-    public static final String BAD_REQUEST_CATEGORY = "attribution_bad_requests";
 
     private final JSONObject json;
 
@@ -80,11 +81,11 @@ public class AttributionLogGenerator {
               .setAmount(random.nextDouble())
               .setTimestamp(random.nextLong())
               .setDeviceId("device" + random.nextLong())
-              .setFieldId(random.nextInt())
-              .setJobId(random.nextInt())
-              .setIrcId(random.nextInt())
-              .setCategoryEnumId(random.nextInt())
-              .setStatus("status" + random.nextInt())
+              .setFieldId(random.nextInt(n))
+              .setJobId(random.nextInt(n))
+              .setIrcId(random.nextInt(n))
+              .setCategoryEnumId(random.nextInt(n))
+              .setStatus("status" + random.nextInt(n))
       );
     }
     return logs;

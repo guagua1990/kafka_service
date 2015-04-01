@@ -38,7 +38,6 @@ public class KafkaTopicHelper {
     String[] arguments = new String[]{
         "--create",
         "--topic", topic,
-        "--zookeeper", "localhost:2181",
         "--partitions", String.valueOf(partitions),
         "--replication-factor", String.valueOf(replicationFactor)
     };

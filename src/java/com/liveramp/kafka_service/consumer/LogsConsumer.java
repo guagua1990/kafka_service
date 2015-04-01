@@ -73,7 +73,7 @@ public class LogsConsumer extends Thread {
 
   private static ConsumerConnector getConsumerConnector() {
     Properties properties = new Properties();
-    properties.put("zookeeper.connect","localhost:2181");
+    properties.put("zookeeper.connect","10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181");
     properties.put("group.id","attribution-test-group");
     ConsumerConfig consumerConfig = new ConsumerConfig(properties);
     return Consumer.createJavaConsumerConnector(consumerConfig);
