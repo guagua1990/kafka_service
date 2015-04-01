@@ -14,7 +14,7 @@ public class ZookeeperServer {
 
   private Properties properties;
 
-  private ZookeeperServer(Properties properties) {
+  ZookeeperServer(Properties properties) {
     this.properties = properties;
   }
 
@@ -39,54 +39,8 @@ public class ZookeeperServer {
     thread.start();
   }
 
-  public static class Builder {
-
-    private final Properties properties;
-
-    private Builder() {
-      this.properties = new Properties();
-    }
-
-    public static Builder create() {
-      return new Builder();
-    }
-
-    public Builder setDataDir(String dataDir) {
-      return setProperty("dataDir", dataDir);
-    }
-
-    public Builder setClientPort(int clientPort) {
-      return setProperty("clientPort", String.valueOf(clientPort));
-    }
-
-    public Builder setDataLogDir(String dataLogDir) {
-      return setProperty("dataLogDir", dataLogDir);
-    }
-
-    public Builder setInitLimit(int initLimit) {
-      return setProperty("initLimit", String.valueOf(initLimit));
-    }
-
-    public Builder setSyncLimit(int syncLimit) {
-      return setProperty("syncLimit", String.valueOf(syncLimit));
-    }
-
-    public Builder setServer(String name, String address) {
-      return setProperty("server." + name, address);
-    }
-
-    private Builder setProperty(String key, String value) {
-      this.properties.setProperty(key, value);
-      return this;
-    }
-
-    public ZookeeperServer build() {
-      return new ZookeeperServer(properties);
-    }
-  }
-
   public static void main(String[] args) throws Exception {
-    ZookeeperServer server = ZookeeperServer.Builder.create()
+    ZookeeperServer server = ZookeeperServerBuilder.create()
         .setClientPort(2181)
         .setInitLimit(10)
         .setSyncLimit(5)
