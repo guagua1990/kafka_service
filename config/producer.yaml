@@ -1,0 +1,3 @@
+type: async
+serializer: com.liveramp.kafka_service.producer.serializer.DefaultStringEncoder
+broker.list: localhost:9092
