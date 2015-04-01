@@ -1,4 +1,4 @@
-package com.liveramp.kafka_service.consumer;
+package com.liveramp.kafka_service.consumer.utils;
 
 import java.util.Timer;
 import java.util.TimerTask;

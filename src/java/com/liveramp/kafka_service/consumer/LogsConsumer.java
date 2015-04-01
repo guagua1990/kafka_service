@@ -14,6 +14,8 @@ import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 
+import com.liveramp.kafka_service.consumer.utils.ScheduledNotifier;
+import com.liveramp.kafka_service.consumer.utils.StatsSummer;
 import com.liveramp.kafka_service.producer.config.SyncProducerConfigBuilder;
 import com.liveramp.kafka_service.producer.serializer.DefaultStringEncoder;
 

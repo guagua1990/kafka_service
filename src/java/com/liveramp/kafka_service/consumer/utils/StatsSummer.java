@@ -1,6 +1,5 @@
-package com.liveramp.kafka_service.consumer;
+package com.liveramp.kafka_service.consumer.utils;
 
-import java.io.IOException;
 import java.util.List;
 
 import com.clearspring.analytics.stream.cardinality.HyperLogLogPlus;
@@ -10,6 +9,7 @@ import org.json.JSONObject;
 
 import com.liveramp.commons.collections.nested_map.TwoKeyTuple;
 import com.liveramp.commons.collections.nested_map.TwoNestedMap;
+import com.liveramp.kafka_service.consumer.utils.JsonFactory;
 
 public class StatsSummer {
   final static int HLL_PRECISION = 14;
