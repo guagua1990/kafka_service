@@ -22,17 +22,8 @@ public class HelloWorldConsumer extends Thread {
     helloWorldConsumer.start();
   }
 
-<<<<<<< Updated upstream
-  public HelloWorldConsumer(){
-    Properties properties = new Properties();
-    properties.put("zookeeper.connect","10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181");
-    properties.put("group.id","test-group");
-    ConsumerConfig consumerConfig = new ConsumerConfig(properties);
-    consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
-=======
   public HelloWorldConsumer() {
     consumerConnector = Consumer.createJavaConsumerConnector(YamlConsumerConfigBuilder.buildFromYaml("config/consumer.yaml"));
->>>>>>> Stashed changes
   }
 
   @Override
