@@ -21,8 +21,9 @@ import com.liveramp.kafka_service.producer.serializer.DefaultStringEncoder;
 
 public class LogsConsumer extends Thread {
 
-  final static String READ_TOPIC = "**";
-  final static String MERGER_TOPIC = "**";
+  final static String READ_TOPIC = "attribution-test";
+  final static String MERGER_TOPIC = "stats-merge";
+  final static long INTERVAL = 30 * 1000;
   final ConsumerConnector consumerConnector;
   final StatsSummer statsSummer = new StatsSummer();
   final Producer<String, String> producer;
@@ -36,7 +37,7 @@ public class LogsConsumer extends Thread {
   public LogsConsumer() {
     consumerConnector = getConsumerConnector();
     producer = getProducer();
-    timer = new ScheduledNotifier(this);
+    timer = new ScheduledNotifier(this, INTERVAL);
   }
 
   @Override
@@ -44,9 +45,15 @@ public class LogsConsumer extends Thread {
     ConsumerIterator<byte[], byte[]> it = getMsgIter();
     timer.start();
 
+    long msgCount = 0;
+
     try {
       while (it.hasNext()) {
         String jsonStr = new String(it.next().message());
+
+        msgCount++;
+        System.out.println("json string: " + jsonStr);
+
         statsSummer.summJson(jsonStr);
         // this is a very cheap check whether timer has send a signal.
         // it will reset the interrupt flag.
@@ -56,6 +63,7 @@ public class LogsConsumer extends Thread {
         }
       }
     } catch (Exception e) {
+      System.out.println("totally, " + msgCount + " messages has been received in this consumer thread.");
       timer.cancel();
       producer.close();
       consumerConnector.shutdown();
@@ -66,7 +74,7 @@ public class LogsConsumer extends Thread {
   private static ConsumerConnector getConsumerConnector() {
     Properties properties = new Properties();
     properties.put("zookeeper.connect","localhost:2181");
-    properties.put("group.id","test-group");
+    properties.put("group.id","attribution-test-group");
     ConsumerConfig consumerConfig = new ConsumerConfig(properties);
     return Consumer.createJavaConsumerConnector(consumerConfig);
   }
