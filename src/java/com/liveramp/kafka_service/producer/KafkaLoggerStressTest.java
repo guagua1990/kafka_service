@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import com.liveramp.kafka_service.producer.config.YamlProducerConfigBuilder;
 import com.liveramp.kafka_service.server.KafkaTopicHelper;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
+import com.liveramp.kafka_service.zookeeper.ZookeeperClientBuilder;
 import com.rapleaf.spruce_lib.log.EntryLogger;
 
 public class KafkaLoggerStressTest {
@@ -33,7 +34,7 @@ public class KafkaLoggerStressTest {
   }
 
   public static void main(String[] args) throws InterruptedException, FileNotFoundException {
-    ZookeeperClient zookeeperClient = ZookeeperClient.Builder
+    ZookeeperClient zookeeperClient = ZookeeperClientBuilder
         .from("10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181")
         .build();
 
