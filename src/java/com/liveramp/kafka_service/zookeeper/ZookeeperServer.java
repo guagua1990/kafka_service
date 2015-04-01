@@ -26,17 +26,18 @@ public class ZookeeperServer {
     serverConfig.readFrom(quorumPeerConfig);
 
     final ZooKeeperServerMain zooKeeperServer = new ZooKeeperServerMain();
-    Thread thread = new Thread() {
-      @Override
-      public void run() {
-        try {
-          zooKeeperServer.runFromConfig(serverConfig);
-        } catch (IOException e) {
-          LOG.error("ZooKeeper Failed", e);
-        }
-      }
-    };
-    thread.start();
+    zooKeeperServer.runFromConfig(serverConfig);
+//    Thread thread = new Thread() {
+//      @Override
+//      public void run() {
+//        try {
+//          zooKeeperServer.runFromConfig(serverConfig);
+//        } catch (IOException e) {
+//          LOG.error("ZooKeeper Failed", e);
+//        }
+//      }
+//    };
+//    thread.start();
   }
 
   public static void main(String[] args) throws Exception {

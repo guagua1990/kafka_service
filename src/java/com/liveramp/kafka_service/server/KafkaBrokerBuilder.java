@@ -7,6 +7,19 @@ public class KafkaBrokerBuilder {
 
   private KafkaBrokerBuilder() {
     this.properties = new Properties();
+    setProperty("num.network.threads", 3);
+    setProperty("num.io.threads", 8);
+    setProperty("socket.send.buffer.bytes", 102400);
+    setProperty("socket.receive.buffer.bytes", 65536);
+    setProperty("socket.request.max.bytes", 104857600);
+    setProperty("log.dirs", "/tmp/kafka-logs");
+    setProperty("num.partitions", 1);
+    setProperty("num.recovery.threads.per.data.dir", 1);
+    setProperty("log.retention.hours", 168);
+    setProperty("log.segment.bytes", 1073741824);
+    setProperty("log.retention.check.interval.ms", 300000);
+    setProperty("log.cleaner.enable", false);
+    setProperty("zookeeper.connection.timeout.ms", 2000);
   }
 
   public static KafkaBrokerBuilder create() {
@@ -21,12 +34,30 @@ public class KafkaBrokerBuilder {
     return setProperty("port", String.valueOf(port));
   }
 
+  public KafkaBrokerBuilder setLogDirs(String logDirs) {
+    return setProperty("log.dirs", logDirs);
+  }
+
+  public KafkaBrokerBuilder setDeleteTopicEnable(boolean deleteTopicEnable) {
+    return setProperty("delete.topic.enable", deleteTopicEnable);
+  }
+
   public KafkaBrokerBuilder setZookeeperConnect(String zkConnect) {
     return setProperty("zookeeper.connect", zkConnect);
   }
 
   private KafkaBrokerBuilder setProperty(String key, String value) {
     this.properties.setProperty(key, value);
+    return this;
+  }
+
+  private KafkaBrokerBuilder setProperty(String key, int value) {
+    this.properties.setProperty(key, String.valueOf(value));
+    return this;
+  }
+
+  private KafkaBrokerBuilder setProperty(String key, boolean value) {
+    this.properties.setProperty(key, String.valueOf(value));
     return this;
   }
 

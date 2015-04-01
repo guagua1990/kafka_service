@@ -7,6 +7,8 @@ public class ZookeeperServerBuilder {
 
   private ZookeeperServerBuilder() {
     this.properties = new Properties();
+    setProperty("broker.id", 0);
+    setProperty("port", 9092);
   }
 
   public static ZookeeperServerBuilder create() {
@@ -18,7 +20,7 @@ public class ZookeeperServerBuilder {
   }
 
   public ZookeeperServerBuilder setClientPort(int clientPort) {
-    return setProperty("clientPort", String.valueOf(clientPort));
+    return setProperty("clientPort", clientPort);
   }
 
   public ZookeeperServerBuilder setDataLogDir(String dataLogDir) {
@@ -26,11 +28,11 @@ public class ZookeeperServerBuilder {
   }
 
   public ZookeeperServerBuilder setInitLimit(int initLimit) {
-    return setProperty("initLimit", String.valueOf(initLimit));
+    return setProperty("initLimit", initLimit);
   }
 
   public ZookeeperServerBuilder setSyncLimit(int syncLimit) {
-    return setProperty("syncLimit", String.valueOf(syncLimit));
+    return setProperty("syncLimit", syncLimit);
   }
 
   public ZookeeperServerBuilder setServer(String name, String address) {
@@ -39,6 +41,16 @@ public class ZookeeperServerBuilder {
 
   private ZookeeperServerBuilder setProperty(String key, String value) {
     this.properties.setProperty(key, value);
+    return this;
+  }
+
+  private ZookeeperServerBuilder setProperty(String key, int value) {
+    this.properties.setProperty(key, String.valueOf(value));
+    return this;
+  }
+
+  private ZookeeperServerBuilder setProperty(String key, boolean value) {
+    this.properties.setProperty(key, String.valueOf(value));
     return this;
   }
 
