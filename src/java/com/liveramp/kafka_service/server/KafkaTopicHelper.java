@@ -1,7 +1,6 @@
 package com.liveramp.kafka_service.server;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.util.Properties;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
@@ -12,8 +11,10 @@ import kafka.common.TopicExistsException;
 import org.I0Itec.zkclient.exception.ZkNodeExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.Tuple2;
 
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
+import com.liveramp.kafka_service.zookeeper.ZookeeperClientBuilder;
 
 public class KafkaTopicHelper {
   private static final Logger LOG = LoggerFactory.getLogger(KafkaTopicHelper.class);
@@ -59,26 +60,20 @@ public class KafkaTopicHelper {
   }
 
   public Set<String> getTopics() {
-    PrintStream original = System.out;
-
-    ByteArrayOutputStream redirection = new ByteArrayOutputStream();
-    PrintStream ps = new PrintStream(redirection);
-    System.setOut(ps);
-
-    String[] arguments = new String[]{
-        "--list",
-    };
-    TopicCommand.TopicCommandOptions options = new TopicCommand.TopicCommandOptions(arguments);
-    TopicCommand.listTopics(zookeeperClient.get(), options);
-
-    System.setOut(original);
-
-    String topicOutput = redirection.toString();
     Set<String> topics = Sets.newHashSet();
-    for (String topic : topicOutput.split("\n")) {
-      topics.add(topic.trim());
+    scala.collection.Iterator<Tuple2<String, Properties>> it = AdminUtils.fetchAllTopicConfigs(zookeeperClient.get()).iterator();
+    while (it.hasNext()) {
+      topics.add(it.next()._1);
     }
-
     return topics;
+  }
+
+  public static void main(String[] args) {
+    ZookeeperClient zookeeperClient = ZookeeperClientBuilder
+        .from("10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181")
+        .build();
+    KafkaTopicHelper topicHelper = KafkaTopicHelper.create(zookeeperClient);
+
+    System.out.println(Joiner.on(", ").join(topicHelper.getTopics()));
   }
 }
