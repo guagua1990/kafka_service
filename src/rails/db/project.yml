@@ -1,0 +1,7 @@
+databases_namespace: com.liveramp.kafka_service
+databases:
+  -
+    root_namespace: com.liveramp.kafka_service.db_models
+    db_name: KafkaService
+    schema_rb: schema.rb
+    models: ../app/models
