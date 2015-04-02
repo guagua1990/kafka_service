@@ -11,3 +11,19 @@
  *= require_self
  *= require_tree .
  */
+
+table#job_stats {
+  margin: 10px;
+  border-collapse: collapse;
+  width: 100%;
+}
+table#job_stats th {
+  border: 10px solid white;
+  font-weight: bold;
+  background-color: white;
+}
+table#job_stats th, table#job_stats td {
+  padding: 10px;
+  text-align: center;
+}
+
