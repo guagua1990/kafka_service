@@ -11,11 +11,14 @@ public class TestJobStat {
   private static final DatabaseConnection CONN = new DatabaseConnection("database");
   private static final IDatabases dbs = new DatabasesImpl(CONN);
 
-  private final IJobStatPersistence jobsStats = dbs.getKafkaService().jobStats();
+  private final IJobStatPersistence jobStats = dbs.getKafkaService().jobStats();
 
   @Test
   public void testJobStatCreation() throws Exception {
-    JobStat jobStat = jobsStats.createDefaultInstance().setJobId(3L).setCountFailure(5L).setCountSuccess(10).setCountTotal(20L);
-    jobStat.save();
+    jobStats.createDefaultInstance()
+        .save();
+
+    jobStats.createDefaultInstance()
+        .save();
   }
 }

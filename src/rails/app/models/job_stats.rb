@@ -1,8 +1,3 @@
 class JobStats < ActiveRecord::Base
-  # attr_accessible :title, :body
-
-  def find_all
-
-  end
-
+  validates_uniqueness_of :job_id
 end
