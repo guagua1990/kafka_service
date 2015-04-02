@@ -11,15 +11,13 @@ import org.json.JSONObject;
 import com.liveramp.commons.collections.nested_map.TwoKeyTuple;
 import com.liveramp.commons.collections.nested_map.TwoNestedMap;
 
-import static com.liveramp.kafka_service.consumer.utils.JsonFactory.StatsType.*;
-
 public class StatsSummer {
   final static int HLL_PRECISION = 14;
 
-  private static final TwoNestedMap<String, Long, Long> totalCountMap = new TwoNestedMap<String, Long, Long>();
-  private static final TwoNestedMap<String, Long, Double> valueMap = new TwoNestedMap<String, Long, Double>();
-  private static final TwoNestedMap<String, Long, HyperLogLogPlus> uniqueClickCountMap = new TwoNestedMap<String, Long, HyperLogLogPlus>();
-  private static final TwoNestedMap<String, String, Long> errorCountMap = new TwoNestedMap<String, String, Long>();
+  private final TwoNestedMap<String, Long, Long> totalCountMap = new TwoNestedMap<String, Long, Long>();
+  private final TwoNestedMap<String, Long, Double> valueMap = new TwoNestedMap<String, Long, Double>();
+  private final TwoNestedMap<String, Long, HyperLogLogPlus> uniqueClickCountMap = new TwoNestedMap<String, Long, HyperLogLogPlus>();
+  private final TwoNestedMap<String, String, Long> errorCountMap = new TwoNestedMap<String, String, Long>();
 
   public void summJson(String jsonStr) throws JSONException {
     JSONObject json = new JSONObject(jsonStr);
@@ -29,9 +27,8 @@ public class StatsSummer {
     double value = json.getDouble("value");
     String clickUid = json.getString("click_uid");
 
-    String key1 = getFirstKey(jobId, ircId);
+    String key1 = getCombinedKey(jobId, ircId);
     long key2 = (long)fieldId;
-
 
     if (!totalCountMap.containsKey(key1, key2)) {
       totalCountMap.put(key1, key2, 0L);
@@ -47,7 +44,8 @@ public class StatsSummer {
 
     if (json.has("status")) {
       try {
-        String k2 = getErrorSecondKey(json);
+        int categoryEnumId = json.getInt("category_enum_id");
+        String k2 = getCombinedKey(fieldId, categoryEnumId);
         if (!errorCountMap.containsKey(key1, k2)) {
           errorCountMap.put(key1, k2, 0L);
         }
@@ -58,15 +56,8 @@ public class StatsSummer {
     }
   }
 
-  public static String getFirstKey(long jobId, long ircId) {
+  public static String getCombinedKey(long jobId, long ircId) {
     return jobId + "-" + ircId;
-  }
-
-  public static String getErrorSecondKey(JSONObject json) throws JSONException {
-    long fieldId = json.getLong("field_definition_id");
-    int categoryEnumId = json.getInt("category_enum_id");
-
-    return fieldId + "-" + categoryEnumId;
   }
 
   public TwoKeyTuple<Long, Long> separateTwoKeys(String str) {
@@ -100,37 +91,32 @@ public class StatsSummer {
     return statJsonStrings;
   }
 
-  public Double summStatJson(JsonFactory.StatsType type, String statsJsonString) throws JSONException {
-    double updatedResult = -1;
+  public void summStatJson(JsonFactory.StatsType type, String statsJsonString) throws JSONException {
     JSONObject json = new JSONObject(statsJsonString);
     switch (type) {
       case TOTAL_COUNT:
         long count = totalCountMap
-            .get(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+            .get(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
                 json.getLong(JsonFactory.FIELD_ID));
-        updatedResult = count + json.getLong(JsonFactory.COUNT);
-        totalCountMap.put(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
-                json.getLong(JsonFactory.FIELD_ID), (long)updatedResult);
+        totalCountMap.put(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+            json.getLong(JsonFactory.FIELD_ID), count + json.getLong(JsonFactory.COUNT));
       case TRANSACTION_VALUE:
         double value = valueMap
-            .get(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+            .get(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
                 json.getLong(JsonFactory.FIELD_ID));
-        updatedResult = value + json.getDouble(JsonFactory.COUNT);
         valueMap
-            .put(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
-                json.getLong(JsonFactory.FIELD_ID), updatedResult);
+            .put(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+                json.getLong(JsonFactory.FIELD_ID), value + json.getDouble(JsonFactory.COUNT));
       case ERROR_COUNT:
         long count1 = errorCountMap
-            .get(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
-                getErrorSecondKey(json));
-        updatedResult = count1 + json.getLong(JsonFactory.COUNT);
+            .get(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+                getCombinedKey(json.getLong(JsonFactory.FIELD_ID), json.getLong(JsonFactory.CATEGORY_ENUM_ID)));
         errorCountMap
-            .put(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
-                getErrorSecondKey(json), (long)updatedResult);
+            .put(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+                getCombinedKey(json.getLong(JsonFactory.FIELD_ID), json.getLong(JsonFactory.CATEGORY_ENUM_ID)), count1 + json.getLong(JsonFactory.COUNT));
       default:
         break;
     }
-    return updatedResult;
   }
 
   public void clear() {
@@ -138,5 +124,15 @@ public class StatsSummer {
     valueMap.clear();
     uniqueClickCountMap.clear();
     errorCountMap.clear();
+  }
+
+  public long getTotalCount(long jobId, long ircId, long fieldId) {
+    Long count = totalCountMap.get(getCombinedKey(jobId, ircId), fieldId);
+    return count == null ? 0 : count;
+  }
+
+  public long getErrorCount(long jobId, long ircId, long fieldId, long categoryEnumId) {
+    Long count = errorCountMap.get(getCombinedKey(jobId, ircId), getCombinedKey(fieldId, categoryEnumId));
+    return count == null ? 0 : count;
   }
 }
