@@ -2,19 +2,19 @@ package com.liveramp.kafka_service.consumer.utils;
 
 import java.util.Timer;
 import java.util.TimerTask;
-
-import com.rapleaf.support.DayOfYear;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ScheduledNotifier {
 
   public final long interval;
 
-  private final Thread targetThread;
   private final Timer timer;
+  private final AtomicBoolean sendStatsFlag;
+  private final static long DELAY = 10 * 1000;
 
-  public ScheduledNotifier(Thread thread, long interval) {
-    this.targetThread = thread;
+  public ScheduledNotifier(long interval, AtomicBoolean sendStatsFlag) {
     this.interval = interval;
+    this.sendStatsFlag = sendStatsFlag;
     timer = new Timer(true);
   }
 
@@ -22,9 +22,9 @@ public class ScheduledNotifier {
     timer.scheduleAtFixedRate(new TimerTask() {
       @Override
       public void run() {
-        targetThread.interrupt();
+        sendStatsFlag.set(true);
       }
-    }, DayOfYear.today().toMillis(), interval);
+    }, DELAY, interval);
   }
 
   public void cancel() {

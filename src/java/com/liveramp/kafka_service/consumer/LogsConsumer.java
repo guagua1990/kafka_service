@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
@@ -16,28 +17,31 @@ import kafka.producer.ProducerConfig;
 
 import com.liveramp.kafka_service.consumer.utils.ScheduledNotifier;
 import com.liveramp.kafka_service.consumer.utils.StatsSummer;
+import com.liveramp.kafka_service.producer.AttributionLogGenerator;
 import com.liveramp.kafka_service.producer.config.SyncProducerConfigBuilder;
 import com.liveramp.kafka_service.producer.serializer.DefaultStringEncoder;
 
 public class LogsConsumer extends Thread {
 
-  final static String READ_TOPIC = "attribution-test";
-  final static String MERGER_TOPIC = "stats-merge";
-  final static long INTERVAL = 30 * 1000;
+  final static String READ_TOPIC = AttributionLogGenerator.GOOD_REQUEST_CATEGORY;
+  final static String MERGER_TOPIC = "stats_merge";
+  final static long INTERVAL = 10 * 1000;
   final ConsumerConnector consumerConnector;
   final StatsSummer statsSummer = new StatsSummer();
   final Producer<String, String> producer;
   final ScheduledNotifier timer;
+  final String DELIMITER = "attribution: ";
+  final AtomicBoolean sendStatsFlag = new AtomicBoolean(false);
 
   public static void main(String[] args) {
-    LogsConsumer logConsumer =new LogsConsumer();
+    LogsConsumer logConsumer = new LogsConsumer();
     logConsumer.start();
   }
 
   public LogsConsumer() {
     consumerConnector = getConsumerConnector();
     producer = getProducer();
-    timer = new ScheduledNotifier(this, INTERVAL);
+    timer = new ScheduledNotifier(INTERVAL, sendStatsFlag);
   }
 
   @Override
@@ -49,17 +53,20 @@ public class LogsConsumer extends Thread {
 
     try {
       while (it.hasNext()) {
-        String jsonStr = new String(it.next().message());
+        String msg = new String(it.next().message());
+        String jsonStr = msg.split(DELIMITER)[1];
 
         msgCount++;
-        System.out.println("json string: " + jsonStr);
 
         statsSummer.summJson(jsonStr);
         // this is a very cheap check whether timer has send a signal.
         // it will reset the interrupt flag.
-        if (interrupted()) {
-          sendStat(statsSummer.getStatsJsonStrings());
+        if (sendStatsFlag.get()) {
+          List<String> strs = statsSummer.getStatsJsonStrings();
+          System.out.println("sending " + strs.size() + " stats to stats-merge.");
+          sendStat(strs);
           statsSummer.clear();
+          sendStatsFlag.set(false);
         }
       }
     } catch (Exception e) {
@@ -74,7 +81,7 @@ public class LogsConsumer extends Thread {
   private static ConsumerConnector getConsumerConnector() {
     Properties properties = new Properties();
     properties.put("zookeeper.connect","10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181");
-    properties.put("group.id","attribution-test-group");
+    properties.put("group.id","test-par-1");
     ConsumerConfig consumerConfig = new ConsumerConfig(properties);
     return Consumer.createJavaConsumerConnector(consumerConfig);
   }
