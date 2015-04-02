@@ -4,11 +4,14 @@ import java.util.List;
 
 import com.clearspring.analytics.stream.cardinality.HyperLogLogPlus;
 import com.google.common.collect.Lists;
+import kafka.utils.Json;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.liveramp.commons.collections.nested_map.TwoKeyTuple;
 import com.liveramp.commons.collections.nested_map.TwoNestedMap;
+
+import static com.liveramp.kafka_service.consumer.utils.JsonFactory.StatsType.*;
 
 public class StatsSummer {
   final static int HLL_PRECISION = 14;
@@ -95,6 +98,39 @@ public class StatsSummer {
       statJsonStrings.add(JsonFactory.createErrorCountEntry(twoKey1.getK1(), twoKey1.getK2(), twoKey2.getK1(), twoKey2.getK2(), errorCountMap.get(keys)));
     }
     return statJsonStrings;
+  }
+
+  public Double summStatJson(JsonFactory.StatsType type, String statsJsonString) throws JSONException {
+    double updatedResult = -1;
+    JSONObject json = new JSONObject(statsJsonString);
+    switch (type) {
+      case TOTAL_COUNT:
+        long count = totalCountMap
+            .get(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+                json.getLong(JsonFactory.FIELD_ID));
+        updatedResult = count + json.getLong(JsonFactory.COUNT);
+        totalCountMap.put(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+                json.getLong(JsonFactory.FIELD_ID), (long)updatedResult);
+      case TRANSACTION_VALUE:
+        double value = valueMap
+            .get(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+                json.getLong(JsonFactory.FIELD_ID));
+        updatedResult = value + json.getDouble(JsonFactory.COUNT);
+        valueMap
+            .put(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+                json.getLong(JsonFactory.FIELD_ID), updatedResult);
+      case ERROR_COUNT:
+        long count1 = errorCountMap
+            .get(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+                getErrorSecondKey(json));
+        updatedResult = count1 + json.getLong(JsonFactory.COUNT);
+        errorCountMap
+            .put(getFirstKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+                getErrorSecondKey(json), (long)updatedResult);
+      default:
+        break;
+    }
+    return updatedResult;
   }
 
   public void clear() {
