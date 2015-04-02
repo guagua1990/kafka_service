@@ -1,0 +1,16 @@
+%h1 Job Stats
+
+%table#job_stats
+  %thead
+    %tr
+      %th Job Id
+      %th Success Count
+      %th Failure Count
+      %th Total Count
+  %tbody
+    - @job_stats.each do |stat|
+      %tr
+        %td= stat.job_id
+        %td= stat.count_success
+        %td= stat.count_failure
+        %td= stat.count_success + stat.count_failure
