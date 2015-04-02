@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150402001336) do
+ActiveRecord::Schema.define(:version => 20150402211253) do
 
   create_table "job_stats", :force => true do |t|
     t.integer  "job_id",        :limit => 8, :null => false
@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(:version => 20150402001336) do
     t.integer  "count_failure", :limit => 8, :null => false
     t.datetime "created_at",                 :null => false
     t.datetime "updated_at",                 :null => false
+    t.integer  "count_total",   :limit => 8, :null => false
   end
 
   add_index "job_stats", ["job_id"], :name => "index_job_stats_on_job_id"
