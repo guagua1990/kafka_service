@@ -1,3 +1,3 @@
 type: async
 serializer: com.liveramp.kafka_service.producer.serializer.DefaultStringEncoder
-broker.list: localhost:9092
+broker.list: s2s-data-syncer00:9092,s2s-data-syncer01:9092,s2s-data-syncer02:9092,s2s-data-syncer03:9092,s2s-data-syncer04:9092
