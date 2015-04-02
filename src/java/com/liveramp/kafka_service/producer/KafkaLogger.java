@@ -1,5 +1,7 @@
 package com.liveramp.kafka_service.producer;
 
+import java.util.Random;
+
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
@@ -20,7 +22,7 @@ public class KafkaLogger implements EntryLogger {
   @Override
   public void writeLogEntry(SpruceLogEntry spruceLogEntry) {
     if (spruceLogEntry != null) {
-      KeyedMessage<String, String> keyedMessage = new KeyedMessage<String, String>(spruceLogEntry.getCategory(), spruceLogEntry.toString());
+      KeyedMessage<String, String> keyedMessage = new KeyedMessage<String, String>(spruceLogEntry.getCategory(), String.valueOf(new Random().nextInt(1000)), spruceLogEntry.toString());
       producer.send(keyedMessage);
     }
   }

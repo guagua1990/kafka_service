@@ -26,6 +26,7 @@ public class KafkaLoggerStressTest {
 
     @Override
     public Void call() throws Exception {
+      System.out.println("writing " + n + " logs...");
       for (AttributionLogGenerator.AttributionLogBuilder log : AttributionLogGenerator.buildNLogs(n)) {
         logger.writeLogEntry(log);
       }
@@ -34,16 +35,6 @@ public class KafkaLoggerStressTest {
   }
 
   public static void main(String[] args) throws InterruptedException, FileNotFoundException {
-    ZookeeperClient zookeeperClient = ZookeeperClientBuilder
-        .from("10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181")
-        .build();
-
-    KafkaTopicHelper helper = KafkaTopicHelper.create(zookeeperClient);
-    if (!helper.getTopics().contains(AttributionLogGenerator.GOOD_REQUEST_CATEGORY)) {
-      helper.createTopic(AttributionLogGenerator.GOOD_REQUEST_CATEGORY, 2, 2);
-    }
-    System.out.println(helper.getTopics());
-
     KafkaLogger logger = new KafkaLogger(YamlProducerConfigBuilder.buildFromYaml("config/producer.yaml"), null);
 
     ExecutorService service = Executors.newFixedThreadPool(8);
