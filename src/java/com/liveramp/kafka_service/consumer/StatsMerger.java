@@ -12,6 +12,7 @@ import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jvyaml.YAML;
 
@@ -44,16 +45,22 @@ public class StatsMerger extends Thread {
         JsonFactory.StatsType statsType = JsonFactory.StatsType.valueOf(object.getString(JsonFactory.STATS_TYPE));
         String statJsonString = object.getString(JsonFactory.STAT);
 
-        double updatedResult = statsSummer.summStatJson(statsType, statJsonString);
-        updateDb(updatedResult, statJsonString);
+        statsSummer.summStatJson(statsType, statJsonString);
+        updateDb(statsSummer, statJsonString);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void updateDb(double updatedResult, String statJsonString) {
-    // TODO: grab information from statJsonString and send it to db.
+  private void updateDb(StatsSummer statsSummer, String statJsonString) throws JSONException {
+    JSONObject object = new JSONObject(statJsonString);
+    long jobId = object.getLong(JsonFactory.JOB_ID);
+    long ircId = object.getLong(JsonFactory.IRC_ID);
+    long fieldId = object.getLong(JsonFactory.FIELD_ID);
+    long totalCount = statsSummer.getTotalCount(jobId, ircId, fieldId);
+    long errorCount = statsSummer.getErrorCount(jobId, ircId, fieldId, 0L);
+
 
   }
 
@@ -72,8 +79,5 @@ public class StatsMerger extends Thread {
     Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumerConnector.createMessageStreams(topicCountMap);
     KafkaStream<byte[], byte[]> stream =  consumerMap.get(ConsumerConstants.MERGER_TOPIC).get(0);
     return stream.iterator();
-  }
-
-  private void sendStat(List<String> jsonStats) {
   }
 }
