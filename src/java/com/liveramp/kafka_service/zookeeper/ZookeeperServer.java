@@ -7,6 +7,12 @@ import org.apache.zookeeper.server.quorum.QuorumPeerMain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liveramp.java_support.alerts_handler.AlertsHandler;
+import com.liveramp.java_support.alerts_handler.AlertsHandlers;
+import com.liveramp.java_support.alerts_handler.recipients.AlertRecipients;
+import com.liveramp.java_support.logging.LoggingHelper;
+import com.liveramp.kafka_service.server.KafkaBroker;
+
 public class ZookeeperServer {
   private static final Logger LOG = LoggerFactory.getLogger(ZookeeperServer.class);
 
@@ -25,27 +31,27 @@ public class ZookeeperServer {
   }
 
   public static void main(String[] args) throws Exception {
+    LoggingHelper.setLoggingProperties("zookeeper");
+    AlertsHandler alertHandler = AlertsHandlers.distribution(KafkaBroker.class);
+
     final ZookeeperServer server = ZookeeperServerBuilder.create()
         .setClientPort(2181)
         .setInitLimit(10)
         .setSyncLimit(5)
-        .setDataDir("/tmp/zookeeper/data")
-        .setDataLogDir("/tmp/zookeeper/log")
-        .addServer("1", "10.99.32.1:2888:3888")
-        .addServer("2", "10.99.32.14:2888:3888")
-        .addServer("3", "10.99.32.36:2888:3888")
+        .setDataDir("/tmp/yjin/zookeeper/data")
+        .setDataLogDir("/tmp/yjin/zookeeper/log")
+        .addServer("0", "s2s-data-syncer00:2888:3888")
+        .addServer("1", "s2s-data-syncer01:2888:3888")
+        .addServer("2", "s2s-data-syncer02:2888:3888")
+        .addServer("3", "s2s-data-syncer03:2888:3888")
+        .addServer("4", "s2s-data-syncer04:2888:3888")
         .build();
 
-    Thread thread = new Thread() {
-      @Override
-      public void run() {
-        try {
-          server.start();
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      }
-    };
-    thread.run();
+    try {
+      server.start();
+    } catch (Exception e) {
+      alertHandler.sendAlert("Exception in ZooKeeper", e,
+          AlertRecipients.of("yjin@liveramp.com"), AlertRecipients.of("ltu@liveramp.com"), AlertRecipients.of("syan@liveramp.com"));
+    }
   }
 }

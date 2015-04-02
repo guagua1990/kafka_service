@@ -12,6 +12,7 @@ import org.I0Itec.zkclient.exception.ZkNodeExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
+import scala.collection.Iterator;
 
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClientBuilder;
@@ -61,9 +62,9 @@ public class KafkaTopicHelper {
 
   public Set<String> getTopics() {
     Set<String> topics = Sets.newHashSet();
-    scala.collection.Iterator<Tuple2<String, Properties>> it = AdminUtils.fetchAllTopicConfigs(zookeeperClient.get()).iterator();
+    Iterator<Tuple2<String, Properties>> it = AdminUtils.fetchAllTopicConfigs(zookeeperClient.get()).iterator();
     while (it.hasNext()) {
-      topics.add(it.next()._1);
+      topics.add(it.next()._1());
     }
     return topics;
   }
@@ -73,7 +74,8 @@ public class KafkaTopicHelper {
         .from("10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181")
         .build();
     KafkaTopicHelper topicHelper = KafkaTopicHelper.create(zookeeperClient);
-
+    System.out.println(Joiner.on(", ").join(topicHelper.getTopics()));
+    topicHelper.deleteTopic("stats_merge");
     System.out.println(Joiner.on(", ").join(topicHelper.getTopics()));
   }
 }

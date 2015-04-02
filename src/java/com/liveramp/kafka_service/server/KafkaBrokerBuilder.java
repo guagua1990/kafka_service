@@ -3,9 +3,11 @@ package com.liveramp.kafka_service.server;
 import java.util.Properties;
 
 public class KafkaBrokerBuilder {
+  private final int brokerId;
   private final Properties properties;
 
-  private KafkaBrokerBuilder() {
+  private KafkaBrokerBuilder(int brokerId) {
+    this.brokerId = brokerId;
     this.properties = new Properties();
     setProperty("num.network.threads", 3);
     setProperty("num.io.threads", 8);
@@ -20,14 +22,12 @@ public class KafkaBrokerBuilder {
     setProperty("log.retention.check.interval.ms", 300000);
     setProperty("log.cleaner.enable", false);
     setProperty("zookeeper.connection.timeout.ms", 2000);
+    setProperty("controlled.shutdown.enabl", true);
+    setProperty("broker.id", String.valueOf(brokerId));
   }
 
-  public static KafkaBrokerBuilder create() {
-    return new KafkaBrokerBuilder();
-  }
-
-  public KafkaBrokerBuilder setBrokerId(int brokerId) {
-    return setProperty("broker.id", String.valueOf(brokerId));
+  public static KafkaBrokerBuilder create(int brokerId) {
+    return new KafkaBrokerBuilder(brokerId);
   }
 
   public KafkaBrokerBuilder setPort(int port) {
@@ -62,6 +62,6 @@ public class KafkaBrokerBuilder {
   }
 
   public KafkaBroker build() {
-    return new KafkaBroker(properties, new KafkaBrokerTime());
+    return new KafkaBroker(brokerId, properties, new KafkaBrokerTime());
   }
 }
