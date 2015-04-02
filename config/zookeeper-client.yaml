@@ -1,0 +1,1 @@
+zookeeper.connect: s2s-data-syncer00:2181,s2s-data-syncer01:2181

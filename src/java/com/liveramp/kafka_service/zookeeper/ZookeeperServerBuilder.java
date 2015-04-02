@@ -7,8 +7,11 @@ public class ZookeeperServerBuilder {
 
   private ZookeeperServerBuilder() {
     this.properties = new Properties();
-    setProperty("broker.id", 0);
-    setProperty("port", 9092);
+    setClientPort(2181);
+    setInitLimit(10);
+    setSyncLimit(5);
+    setDataDir("/tmp/zookeeper/data");
+    setDataLogDir("/tmp/zookeeper/log");
   }
 
   public static ZookeeperServerBuilder create() {
@@ -36,7 +39,7 @@ public class ZookeeperServerBuilder {
   }
 
   public ZookeeperServerBuilder addServer(String name, String address) {
-    return setProperty("server." + name, address);
+    return setProperty(name, address);
   }
 
   private ZookeeperServerBuilder setProperty(String key, String value) {

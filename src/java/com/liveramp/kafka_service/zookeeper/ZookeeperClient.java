@@ -1,7 +1,11 @@
 package com.liveramp.kafka_service.zookeeper;
 
+import java.io.FileReader;
+import java.util.Map;
+
 import kafka.utils.ZKStringSerializer$;
 import org.I0Itec.zkclient.ZkClient;
+import org.jvyaml.YAML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +30,10 @@ public class ZookeeperClient {
     return zkClient;
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
+    Map map = (Map)YAML.load(new FileReader("config/zookeeper-client.yaml"));
     ZookeeperClient zookeeperClient = ZookeeperClientBuilder
-        .from("10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181")
+        .from((String)map.get("zookeeper.connect"))
         .build();
   }
 }

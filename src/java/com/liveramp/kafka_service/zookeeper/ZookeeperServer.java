@@ -1,9 +1,13 @@
 package com.liveramp.kafka_service.zookeeper;
 
+import java.io.FileReader;
+import java.util.Map;
 import java.util.Properties;
 
+import clojure.lang.Obj;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 import org.apache.zookeeper.server.quorum.QuorumPeerMain;
+import org.jvyaml.YAML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,21 +38,21 @@ public class ZookeeperServer {
     LoggingHelper.setLoggingProperties("zookeeper");
     AlertsHandler alertHandler = AlertsHandlers.distribution(KafkaBroker.class);
 
-    final ZookeeperServer server = ZookeeperServerBuilder.create()
-        .setClientPort(2181)
-        .setInitLimit(10)
-        .setSyncLimit(5)
-        .setDataDir("/tmp/yjin/zookeeper/data")
-        .setDataLogDir("/tmp/yjin/zookeeper/log")
-        .addServer("0", "s2s-data-syncer00:2888:3888")
-        .addServer("1", "s2s-data-syncer01:2888:3888")
-        .addServer("2", "s2s-data-syncer02:2888:3888")
-        .addServer("3", "s2s-data-syncer03:2888:3888")
-        .addServer("4", "s2s-data-syncer04:2888:3888")
-        .build();
+    Map map = (Map)YAML.load(new FileReader("config/zookeeper-server.yaml"));
+    final ZookeeperServerBuilder serverBuilder = ZookeeperServerBuilder.create()
+        .setClientPort(((Number)map.get("clientPort")).intValue())
+        .setDataDir((String)map.get("dataDir"))
+        .setDataLogDir((String)map.get("dataLogDir"));
+
+    for (Object entry : map.entrySet()) {
+      String key = (String)((Map.Entry)entry).getKey();
+      if (key.contains("server")) {
+        serverBuilder.addServer(key, (String)((Map.Entry)entry).getValue());
+      }
+    }
 
     try {
-      server.start();
+      serverBuilder.build().start();
     } catch (Exception e) {
       alertHandler.sendAlert("Exception in ZooKeeper", e,
           AlertRecipients.of("yjin@liveramp.com"), AlertRecipients.of("ltu@liveramp.com"), AlertRecipients.of("syan@liveramp.com"));
