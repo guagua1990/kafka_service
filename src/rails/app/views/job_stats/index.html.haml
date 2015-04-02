@@ -7,10 +7,12 @@
       %th Success Count
       %th Failure Count
       %th Total Count
+      %th Status
   %tbody
     - @job_stats.each do |stat|
       %tr
         %td= stat.job_id
         %td= stat.count_success
         %td= stat.count_failure
-        %td= stat.count_success + stat.count_failure
+        %td= stat.count_total
+        %td= stat.count_success + stat.count_failure == stat.count_total ? "Done" : "Pending"
