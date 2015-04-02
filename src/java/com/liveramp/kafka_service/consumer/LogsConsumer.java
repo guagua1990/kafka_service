@@ -1,5 +1,7 @@
 package com.liveramp.kafka_service.consumer;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,12 +16,14 @@ import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
+import org.jvyaml.YAML;
 
 import com.liveramp.kafka_service.consumer.utils.ScheduledNotifier;
 import com.liveramp.kafka_service.consumer.utils.StatsSummer;
 import com.liveramp.kafka_service.producer.AttributionLogGenerator;
 import com.liveramp.kafka_service.producer.config.SyncProducerConfigBuilder;
 import com.liveramp.kafka_service.producer.serializer.DefaultStringEncoder;
+import com.liveramp.kafka_service.zookeeper.ZookeeperClientBuilder;
 
 public class LogsConsumer extends Thread {
 
@@ -33,12 +37,12 @@ public class LogsConsumer extends Thread {
   final String DELIMITER = "attribution: ";
   final AtomicBoolean sendStatsFlag = new AtomicBoolean(false);
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws FileNotFoundException {
     LogsConsumer logConsumer = new LogsConsumer();
     logConsumer.start();
   }
 
-  public LogsConsumer() {
+  public LogsConsumer() throws FileNotFoundException {
     consumerConnector = getConsumerConnector();
     producer = getProducer();
     timer = new ScheduledNotifier(INTERVAL, sendStatsFlag);
@@ -78,9 +82,10 @@ public class LogsConsumer extends Thread {
     }
   }
 
-  private static ConsumerConnector getConsumerConnector() {
+  private static ConsumerConnector getConsumerConnector() throws FileNotFoundException {
     Properties properties = new Properties();
-    properties.put("zookeeper.connect","10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181");
+    Map map = (Map)YAML.load(new FileReader("config/zookeeper-client.yaml"));
+    properties.put("zookeeper.connect", map.get("zookeeper.connect"));
     properties.put("group.id","test-par-1");
     ConsumerConfig consumerConfig = new ConsumerConfig(properties);
     return Consumer.createJavaConsumerConnector(consumerConfig);
@@ -88,8 +93,9 @@ public class LogsConsumer extends Thread {
 
   private static Producer<String, String> getProducer() {
     ProducerConfig config = new SyncProducerConfigBuilder(new DefaultStringEncoder())
-        .addBroker("localhost", 9092)
+        .addBroker("s2s-data-syncer00:9092,s2s-data-syncer01:9092,s2s-data-syncer02:9092,s2s-data-syncer03:9092,s2s-data-syncer04:9092", 9092)
         .build();
+
     return new Producer<String, String>(config);
   }
 
