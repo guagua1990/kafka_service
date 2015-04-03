@@ -41,16 +41,11 @@ public class StatsSummer {
     uniqueClickCountMap.get(key1, key2).offer(clickUid.getBytes());
 
     if (json.has("status")) {
-      try {
-        int categoryEnumId = json.getInt("category_enum_id");
-        String k2 = getCombinedKey(fieldId, categoryEnumId);
-        if (!errorCountMap.containsKey(key1, k2)) {
-          errorCountMap.put(key1, k2, 0L);
-        }
-        errorCountMap.put(key1, k2, errorCountMap.get(key1, k2) + 1);
-      } catch (JSONException e) {
-        throw new RuntimeException("Status and category enum id are inconsistent in the log");
+      String k2 = getCombinedKey(fieldId, 0);
+      if (!errorCountMap.containsKey(key1, k2)) {
+        errorCountMap.put(key1, k2, 0L);
       }
+      errorCountMap.put(key1, k2, errorCountMap.get(key1, k2) + 1);
     }
   }
 
