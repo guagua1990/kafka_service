@@ -41,55 +41,51 @@ public class BaseJobStatPersistenceImpl extends AbstractDatabaseModel<JobStat> i
   private final IDatabases databases;
 
   public BaseJobStatPersistenceImpl(BaseDatabaseConnection conn, IDatabases databases) {
-    super(conn, "job_stats", Arrays.<String>asList("job_id", "irc_id", "field_id", "count_success", "count_failure", "count_total", "created_at", "updated_at"));
+    super(conn, "job_stats", Arrays.<String>asList("job_id", "count_error", "count_actual_total", "count_expected_total", "created_at", "updated_at"));
     this.databases = databases;
   }
 
   @Override
   public JobStat create(Map<Enum, Object> fieldsMap) throws IOException {
     long job_id = (Long) fieldsMap.get(JobStat._Fields.job_id);
-    long irc_id = (Long) fieldsMap.get(JobStat._Fields.irc_id);
-    long field_id = (Long) fieldsMap.get(JobStat._Fields.field_id);
-    Long count_success_tmp = (Long) fieldsMap.get(JobStat._Fields.count_success);
-    Long count_success = count_success_tmp == null ? 0 : count_success_tmp;
-    Long count_failure_tmp = (Long) fieldsMap.get(JobStat._Fields.count_failure);
-    Long count_failure = count_failure_tmp == null ? 0 : count_failure_tmp;
-    Long count_total_tmp = (Long) fieldsMap.get(JobStat._Fields.count_total);
-    Long count_total = count_total_tmp == null ? 0 : count_total_tmp;
+    Long count_error_tmp = (Long) fieldsMap.get(JobStat._Fields.count_error);
+    Long count_error = count_error_tmp == null ? 0 : count_error_tmp;
+    Long count_actual_total_tmp = (Long) fieldsMap.get(JobStat._Fields.count_actual_total);
+    Long count_actual_total = count_actual_total_tmp == null ? 0 : count_actual_total_tmp;
+    Long count_expected_total_tmp = (Long) fieldsMap.get(JobStat._Fields.count_expected_total);
+    Long count_expected_total = count_expected_total_tmp == null ? 0 : count_expected_total_tmp;
     long created_at = (Long) fieldsMap.get(JobStat._Fields.created_at);
     long updated_at = (Long) fieldsMap.get(JobStat._Fields.updated_at);
-    return create(job_id, irc_id, field_id, count_success, count_failure, count_total, created_at, updated_at);
+    return create(job_id, count_error, count_actual_total, count_expected_total, created_at, updated_at);
   }
 
-  public JobStat create(final long job_id, final long irc_id, final long field_id, final Long count_success, final Long count_failure, final Long count_total, final long updated_at) throws IOException {
-    return this.create(job_id, irc_id, field_id, count_success, count_failure, count_total, System.currentTimeMillis(), updated_at);
+  public JobStat create(final long job_id, final Long count_error, final Long count_actual_total, final Long count_expected_total, final long updated_at) throws IOException {
+    return this.create(job_id, count_error, count_actual_total, count_expected_total, System.currentTimeMillis(), updated_at);
   }
-  public JobStat create(final long job_id, final long irc_id, final long field_id, final Long count_success, final Long count_failure, final Long count_total, final long created_at, final long updated_at) throws IOException {
+  public JobStat create(final long job_id, final Long count_error, final Long count_actual_total, final Long count_expected_total, final long created_at, final long updated_at) throws IOException {
     long __id = realCreate(new AttrSetter() {
       public void set(PreparedStatement stmt) throws SQLException {
           stmt.setLong(1, job_id);
-          stmt.setLong(2, irc_id);
-          stmt.setLong(3, field_id);
-        if (count_success == null) {
+        if (count_error == null) {
+          stmt.setNull(2, java.sql.Types.INTEGER);
+        } else {
+          stmt.setLong(2, count_error);
+        }
+        if (count_actual_total == null) {
+          stmt.setNull(3, java.sql.Types.INTEGER);
+        } else {
+          stmt.setLong(3, count_actual_total);
+        }
+        if (count_expected_total == null) {
           stmt.setNull(4, java.sql.Types.INTEGER);
         } else {
-          stmt.setLong(4, count_success);
+          stmt.setLong(4, count_expected_total);
         }
-        if (count_failure == null) {
-          stmt.setNull(5, java.sql.Types.INTEGER);
-        } else {
-          stmt.setLong(5, count_failure);
-        }
-        if (count_total == null) {
-          stmt.setNull(6, java.sql.Types.INTEGER);
-        } else {
-          stmt.setLong(6, count_total);
-        }
-          stmt.setTimestamp(7, new Timestamp(created_at));
-          stmt.setTimestamp(8, new Timestamp(updated_at));
+          stmt.setTimestamp(5, new Timestamp(created_at));
+          stmt.setTimestamp(6, new Timestamp(updated_at));
       }
-    }, getInsertStatement(Arrays.<String>asList("job_id", "irc_id", "field_id", "count_success", "count_failure", "count_total", "created_at", "updated_at")));
-    JobStat newInst = new JobStat(__id, job_id, irc_id, field_id, count_success, count_failure, count_total, created_at, updated_at, databases);
+    }, getInsertStatement(Arrays.<String>asList("job_id", "count_error", "count_actual_total", "count_expected_total", "created_at", "updated_at")));
+    JobStat newInst = new JobStat(__id, job_id, count_error, count_actual_total, count_expected_total, created_at, updated_at, databases);
     newInst.setCreated(true);
     cachedById.put(__id, newInst);
     clearForeignKeyCache();
@@ -97,17 +93,15 @@ public class BaseJobStatPersistenceImpl extends AbstractDatabaseModel<JobStat> i
   }
 
 
-  public JobStat create(final long job_id, final long irc_id, final long field_id, final long created_at, final long updated_at) throws IOException {
+  public JobStat create(final long job_id, final long created_at, final long updated_at) throws IOException {
     long __id = realCreate(new AttrSetter() {
       public void set(PreparedStatement stmt) throws SQLException {
           stmt.setLong(1, job_id);
-          stmt.setLong(2, irc_id);
-          stmt.setLong(3, field_id);
-          stmt.setTimestamp(4, new Timestamp(created_at));
-          stmt.setTimestamp(5, new Timestamp(updated_at));
+          stmt.setTimestamp(2, new Timestamp(created_at));
+          stmt.setTimestamp(3, new Timestamp(updated_at));
       }
-    }, getInsertStatement(Arrays.<String>asList("job_id", "irc_id", "field_id", "created_at", "updated_at")));
-    JobStat newInst = new JobStat(__id, job_id, irc_id, field_id, null, null, null, created_at, updated_at, databases);
+    }, getInsertStatement(Arrays.<String>asList("job_id", "created_at", "updated_at")));
+    JobStat newInst = new JobStat(__id, job_id, null, null, null, created_at, updated_at, databases);
     newInst.setCreated(true);
     cachedById.put(__id, newInst);
     clearForeignKeyCache();
@@ -116,7 +110,7 @@ public class BaseJobStatPersistenceImpl extends AbstractDatabaseModel<JobStat> i
 
 
   public JobStat createDefaultInstance() throws IOException {
-    return create(0L, 0L, 0L, 0L, 0L);
+    return create(0L, 0L, 0L);
   }
 
   public Set<JobStat> find(Map<Enum, Object> fieldsMap) throws IOException {
@@ -168,19 +162,13 @@ public class BaseJobStatPersistenceImpl extends AbstractDatabaseModel<JobStat> i
             case job_id:
               preparedStatement.setLong(i+1, (Long) nonNullValues.get(i));
               break;
-            case irc_id:
+            case count_error:
               preparedStatement.setLong(i+1, (Long) nonNullValues.get(i));
               break;
-            case field_id:
+            case count_actual_total:
               preparedStatement.setLong(i+1, (Long) nonNullValues.get(i));
               break;
-            case count_success:
-              preparedStatement.setLong(i+1, (Long) nonNullValues.get(i));
-              break;
-            case count_failure:
-              preparedStatement.setLong(i+1, (Long) nonNullValues.get(i));
-              break;
-            case count_total:
+            case count_expected_total:
               preparedStatement.setLong(i+1, (Long) nonNullValues.get(i));
               break;
             case created_at:
@@ -222,19 +210,13 @@ public class BaseJobStatPersistenceImpl extends AbstractDatabaseModel<JobStat> i
             case job_id:
               preparedStatement.setLong(++index, (Long) parameter);
               break;
-            case irc_id:
+            case count_error:
               preparedStatement.setLong(++index, (Long) parameter);
               break;
-            case field_id:
+            case count_actual_total:
               preparedStatement.setLong(++index, (Long) parameter);
               break;
-            case count_success:
-              preparedStatement.setLong(++index, (Long) parameter);
-              break;
-            case count_failure:
-              preparedStatement.setLong(++index, (Long) parameter);
-              break;
-            case count_total:
+            case count_expected_total:
               preparedStatement.setLong(++index, (Long) parameter);
               break;
             case created_at:
@@ -256,34 +238,28 @@ public class BaseJobStatPersistenceImpl extends AbstractDatabaseModel<JobStat> i
     {
       stmt.setLong(1, model.getJobId());
     }
-    {
-      stmt.setLong(2, model.getIrcId());
+    if (model.getCountError() == null) {
+      stmt.setNull(2, java.sql.Types.INTEGER);
+    } else {
+      stmt.setLong(2, model.getCountError());
     }
-    {
-      stmt.setLong(3, model.getFieldId());
+    if (model.getCountActualTotal() == null) {
+      stmt.setNull(3, java.sql.Types.INTEGER);
+    } else {
+      stmt.setLong(3, model.getCountActualTotal());
     }
-    if (model.getCountSuccess() == null) {
+    if (model.getCountExpectedTotal() == null) {
       stmt.setNull(4, java.sql.Types.INTEGER);
     } else {
-      stmt.setLong(4, model.getCountSuccess());
-    }
-    if (model.getCountFailure() == null) {
-      stmt.setNull(5, java.sql.Types.INTEGER);
-    } else {
-      stmt.setLong(5, model.getCountFailure());
-    }
-    if (model.getCountTotal() == null) {
-      stmt.setNull(6, java.sql.Types.INTEGER);
-    } else {
-      stmt.setLong(6, model.getCountTotal());
+      stmt.setLong(4, model.getCountExpectedTotal());
     }
     {
-      stmt.setTimestamp(7, new Timestamp(model.getCreatedAt()));
+      stmt.setTimestamp(5, new Timestamp(model.getCreatedAt()));
     }
     {
-      stmt.setTimestamp(8, new Timestamp(model.getUpdatedAt()));
+      stmt.setTimestamp(6, new Timestamp(model.getUpdatedAt()));
     }
-    stmt.setLong(9, model.getId());
+    stmt.setLong(7, model.getId());
   }
 
   @Override
@@ -291,11 +267,9 @@ public class BaseJobStatPersistenceImpl extends AbstractDatabaseModel<JobStat> i
     boolean allFields = selectedFields == null || selectedFields.isEmpty();
     return new JobStat(rs.getLong("id"),
       allFields || selectedFields.contains(JobStat._Fields.job_id) ? getLongOrNull(rs, "job_id") : 0L,
-      allFields || selectedFields.contains(JobStat._Fields.irc_id) ? getLongOrNull(rs, "irc_id") : 0L,
-      allFields || selectedFields.contains(JobStat._Fields.field_id) ? getLongOrNull(rs, "field_id") : 0L,
-      allFields || selectedFields.contains(JobStat._Fields.count_success) ? getLongOrNull(rs, "count_success") : null,
-      allFields || selectedFields.contains(JobStat._Fields.count_failure) ? getLongOrNull(rs, "count_failure") : null,
-      allFields || selectedFields.contains(JobStat._Fields.count_total) ? getLongOrNull(rs, "count_total") : null,
+      allFields || selectedFields.contains(JobStat._Fields.count_error) ? getLongOrNull(rs, "count_error") : null,
+      allFields || selectedFields.contains(JobStat._Fields.count_actual_total) ? getLongOrNull(rs, "count_actual_total") : null,
+      allFields || selectedFields.contains(JobStat._Fields.count_expected_total) ? getLongOrNull(rs, "count_expected_total") : null,
       allFields || selectedFields.contains(JobStat._Fields.created_at) ? getDateAsLong(rs, "created_at") : 0L,
       allFields || selectedFields.contains(JobStat._Fields.updated_at) ? getDateAsLong(rs, "updated_at") : 0L,
       databases
@@ -306,24 +280,16 @@ public class BaseJobStatPersistenceImpl extends AbstractDatabaseModel<JobStat> i
     return find(new HashMap<Enum, Object>(){{put(JobStat._Fields.job_id, value);}});
   }
 
-  public Set<JobStat> findByIrcId(final long value) throws IOException {
-    return find(new HashMap<Enum, Object>(){{put(JobStat._Fields.irc_id, value);}});
+  public Set<JobStat> findByCountError(final Long value) throws IOException {
+    return find(new HashMap<Enum, Object>(){{put(JobStat._Fields.count_error, value);}});
   }
 
-  public Set<JobStat> findByFieldId(final long value) throws IOException {
-    return find(new HashMap<Enum, Object>(){{put(JobStat._Fields.field_id, value);}});
+  public Set<JobStat> findByCountActualTotal(final Long value) throws IOException {
+    return find(new HashMap<Enum, Object>(){{put(JobStat._Fields.count_actual_total, value);}});
   }
 
-  public Set<JobStat> findByCountSuccess(final Long value) throws IOException {
-    return find(new HashMap<Enum, Object>(){{put(JobStat._Fields.count_success, value);}});
-  }
-
-  public Set<JobStat> findByCountFailure(final Long value) throws IOException {
-    return find(new HashMap<Enum, Object>(){{put(JobStat._Fields.count_failure, value);}});
-  }
-
-  public Set<JobStat> findByCountTotal(final Long value) throws IOException {
-    return find(new HashMap<Enum, Object>(){{put(JobStat._Fields.count_total, value);}});
+  public Set<JobStat> findByCountExpectedTotal(final Long value) throws IOException {
+    return find(new HashMap<Enum, Object>(){{put(JobStat._Fields.count_expected_total, value);}});
   }
 
   public Set<JobStat> findByCreatedAt(final long value) throws IOException {

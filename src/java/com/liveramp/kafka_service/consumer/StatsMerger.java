@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.jvyaml.YAML;
 
@@ -20,6 +20,7 @@ import com.liveramp.kafka_service.consumer.utils.JsonFactory;
 import com.liveramp.kafka_service.consumer.utils.StatsSummer;
 import com.liveramp.kafka_service.db_models.DatabasesImpl;
 import com.liveramp.kafka_service.db_models.db.iface.IJobStatPersistence;
+import com.liveramp.kafka_service.db_models.db.models.JobStat;
 
 public class StatsMerger extends Thread {
 
@@ -57,7 +58,7 @@ public class StatsMerger extends Thread {
     }
   }
 
-  private void updateDb(StatsSummer statsSummer, String statJsonString) throws JSONException {
+  private void updateDb(StatsSummer statsSummer, String statJsonString) throws Exception {
     JSONObject object = new JSONObject(statJsonString);
     long jobId = object.getLong(JsonFactory.JOB_ID);
     long ircId = object.getLong(JsonFactory.IRC_ID);
@@ -65,10 +66,17 @@ public class StatsMerger extends Thread {
     long totalCount = statsSummer.getTotalCount(jobId, ircId, fieldId);
     long errorCount = statsSummer.getErrorCount(jobId, ircId, fieldId);
 
-    jobStatPersist.query()
-        .jobId(jobId)
-        .ircId(ircId);
+    long timestamp = System.currentTimeMillis();
 
+    Set<JobStat> jobStats = jobStatPersist.query()
+        .jobId(jobId)
+        .ircId(ircId)
+        .fieldId(fieldId)
+        .find();
+
+    if (jobStats.isEmpty()) {
+      jobStatPersist.create(jobId, ircId, fieldId, totalCount - errorCount, errorCount, 0L, timestamp, timestamp);
+    }
   }
 
   private static ConsumerConnector getConsumerConnector() throws FileNotFoundException {
