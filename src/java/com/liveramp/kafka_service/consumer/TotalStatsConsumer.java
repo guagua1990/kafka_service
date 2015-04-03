@@ -60,7 +60,7 @@ public class TotalStatsConsumer extends Thread {
     }
   }
 
-  private void updateDb(long jobId, long chunkId, long requestNum) throws Exception {
+  private synchronized void updateDb(long jobId, long chunkId, long requestNum) throws Exception {
     db.setAutoCommit(false);
 
     Set<JobStat> jobStats = jobStatPersist.query()
@@ -81,16 +81,15 @@ public class TotalStatsConsumer extends Thread {
           .setUpdatedAt(timestamp)
           .save();
       if (!save) {
-        System.out.println();
+        System.out.println("!!!!!");
       }
-      System.out.println(jobStat.getCountExpectedTotal());
     }
-
-    long queryAgain = jobStatPersist.query().jobId(jobId).find().iterator().next().getCountExpectedTotal();
-    System.out.printf("count: %d, total: %d, readBack: %d\n", requestNum, expectedTotalCount, queryAgain);
 
     db.commit();
     db.setAutoCommit(true);
+
+    long queryAgain = jobStatPersist.query().jobId(jobId).find().iterator().next().getCountExpectedTotal();
+    System.out.printf("count: %d, total: %d, readBack: %d\n", requestNum, expectedTotalCount, queryAgain);
   }
 
   private static ConsumerConnector getConsumerConnector() throws FileNotFoundException {
