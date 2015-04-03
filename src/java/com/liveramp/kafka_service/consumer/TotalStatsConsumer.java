@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import com.google.common.collect.Maps;
 import kafka.consumer.Consumer;
@@ -18,6 +19,7 @@ import org.jvyaml.YAML;
 import com.liveramp.kafka_service.db_models.DatabasesImpl;
 import com.liveramp.kafka_service.db_models.db.IKafkaService;
 import com.liveramp.kafka_service.db_models.db.iface.IJobStatPersistence;
+import com.liveramp.kafka_service.db_models.db.models.JobStat;
 import com.rapleaf.support.collections.Accessors;
 
 public class TotalStatsConsumer extends Thread {
@@ -66,7 +68,8 @@ public class TotalStatsConsumer extends Thread {
   private void updateDb(long jobId, long chunkId, long requestNum) throws Exception {
     long timestamp = System.currentTimeMillis();
 
-    if (!jobCount.containsKey(jobId)) {
+    Set<JobStat> jobStats = jobStatPersist.query().jobId(jobId).find();
+    if (!jobStats.isEmpty()) {
       jobCount.put(jobId, requestNum);
       jobStatPersist.create(jobId, 0L, 0L, requestNum, timestamp, timestamp);
     } else {

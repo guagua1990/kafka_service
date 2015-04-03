@@ -74,10 +74,10 @@ public class StatsMerger extends Thread {
     long jobId = object.getLong(JsonFactory.JOB_ID);
     long count = object.getLong(JsonFactory.COUNT);
 
-
+    Set<JobStat> jobStats = jobStatPersist.query().jobId(jobId).find();
     long timestamp = System.currentTimeMillis();
 
-    if (!jobToTotalAndError.containsKey(jobId)) {
+    if (!jobStats.isEmpty()) {
       if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
         jobToTotalAndError.put(jobId, Pair.makePair(count, 0L));
         jobStatPersist.create(jobId, 0L, count, 0L, timestamp, timestamp);
