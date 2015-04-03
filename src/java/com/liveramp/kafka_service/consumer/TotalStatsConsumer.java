@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
+import com.google.common.collect.Maps;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
@@ -18,13 +18,14 @@ import org.jvyaml.YAML;
 import com.liveramp.kafka_service.db_models.DatabasesImpl;
 import com.liveramp.kafka_service.db_models.db.IKafkaService;
 import com.liveramp.kafka_service.db_models.db.iface.IJobStatPersistence;
-import com.liveramp.kafka_service.db_models.db.models.JobStat;
+import com.rapleaf.support.collections.Accessors;
 
 public class TotalStatsConsumer extends Thread {
 
   private final IJobStatPersistence jobStatPersist;
   private final IKafkaService db;
   private final ConsumerConnector consumerConnector;
+  private final Map<Long, Long> jobCount;
 
   public static void main(String[] args) throws FileNotFoundException {
     TotalStatsConsumer consumer = new TotalStatsConsumer();
@@ -34,9 +35,11 @@ public class TotalStatsConsumer extends Thread {
   public TotalStatsConsumer() throws FileNotFoundException {
     db = new DatabasesImpl().getKafkaService();
     db.disableCaching();
+    db.setAutoCommit(true);
     jobStatPersist = db.jobStats();
     jobStatPersist.disableCaching();
     consumerConnector = getConsumerConnector();
+    jobCount = Maps.newHashMap();
   }
 
   @Override
@@ -60,43 +63,26 @@ public class TotalStatsConsumer extends Thread {
     }
   }
 
-  private synchronized void updateDb(long jobId, long chunkId, long requestNum) throws Exception {
-    db.setAutoCommit(false);
-
-    Set<JobStat> jobStats = jobStatPersist.query()
-        .jobId(jobId)
-        .find();
-
+  private void updateDb(long jobId, long chunkId, long requestNum) throws Exception {
     long timestamp = System.currentTimeMillis();
 
-    long expectedTotalCount = 0L;
-    if (jobStats.isEmpty()) {
-      expectedTotalCount = requestNum;
+    if (!jobCount.containsKey(jobId)) {
+      jobCount.put(jobId, requestNum);
       jobStatPersist.create(jobId, 0L, 0L, requestNum, timestamp, timestamp);
     } else {
-      JobStat jobStat = jobStats.iterator().next();
-      expectedTotalCount = requestNum + jobStat.getCountExpectedTotal();
-
-      boolean save = jobStat.setCountExpectedTotal(expectedTotalCount)
+      jobCount.put(jobId, jobCount.get(jobId) + requestNum);
+      Accessors.first(jobStatPersist.query().jobId(jobId).find())
+          .setCountExpectedTotal(jobCount.get(jobId))
           .setUpdatedAt(timestamp)
           .save();
-      if (!save) {
-        System.out.println("!!!!!");
-      }
     }
-
-    db.commit();
-    db.setAutoCommit(true);
-
-    long queryAgain = jobStatPersist.query().jobId(jobId).find().iterator().next().getCountExpectedTotal();
-    System.out.printf("count: %d, total: %d, readBack: %d\n", requestNum, expectedTotalCount, queryAgain);
   }
 
   private static ConsumerConnector getConsumerConnector() throws FileNotFoundException {
     Properties properties = new Properties();
     Map map = (Map)YAML.load(new FileReader("config/zookeeper-client.yaml"));
     properties.put("zookeeper.connect", map.get("zookeeper.connect"));
-    properties.put("group.id","test-par-1");
+    properties.put("group.id", "test-par-1");
     ConsumerConfig consumerConfig = new ConsumerConfig(properties);
     return Consumer.createJavaConsumerConnector(consumerConfig);
   }
@@ -105,7 +91,7 @@ public class TotalStatsConsumer extends Thread {
     Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
     topicCountMap.put(ConsumerConstants.TOTAL_STATS_TOPIC, 1);
     Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumerConnector.createMessageStreams(topicCountMap);
-    KafkaStream<byte[], byte[]> stream =  consumerMap.get(ConsumerConstants.TOTAL_STATS_TOPIC).get(0);
+    KafkaStream<byte[], byte[]> stream = consumerMap.get(ConsumerConstants.TOTAL_STATS_TOPIC).get(0);
     return stream.iterator();
   }
 }
