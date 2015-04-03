@@ -77,7 +77,7 @@ public class StatsMerger extends Thread {
     Set<JobStat> jobStats = jobStatPersist.query().jobId(jobId).find();
     long timestamp = System.currentTimeMillis();
 
-    if (!jobStats.isEmpty()) {
+    if (jobStats.isEmpty()) {
       if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
         jobToTotalAndError.put(jobId, Pair.makePair(count, 0L));
         jobStatPersist.create(jobId, 0L, count, 0L, timestamp, timestamp);
@@ -86,6 +86,9 @@ public class StatsMerger extends Thread {
         jobStatPersist.create(jobId, count, 0L, 0L, timestamp, timestamp);
       }
     } else {
+      if (!jobToTotalAndError.containsKey(jobId)) {
+        jobToTotalAndError.put(jobId, Pair.makePair(0L, 0L));
+      }
       Pair<Long, Long> pair = jobToTotalAndError.get(jobId);
       if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
         jobToTotalAndError.put(jobId, Pair.makePair(count + pair.first, pair.second));
