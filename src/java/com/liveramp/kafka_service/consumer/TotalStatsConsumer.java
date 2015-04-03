@@ -69,10 +69,13 @@ public class TotalStatsConsumer extends Thread {
     long timestamp = System.currentTimeMillis();
 
     Set<JobStat> jobStats = jobStatPersist.query().jobId(jobId).find();
-    if (!jobStats.isEmpty()) {
+    if (jobStats.isEmpty()) {
       jobCount.put(jobId, requestNum);
       jobStatPersist.create(jobId, 0L, 0L, requestNum, timestamp, timestamp);
     } else {
+      if (!jobCount.containsKey(jobId)) {
+        jobCount.put(jobId, 0L);
+      }
       jobCount.put(jobId, jobCount.get(jobId) + requestNum);
       Accessors.first(jobStatPersist.query().jobId(jobId).find())
           .setCountExpectedTotal(jobCount.get(jobId))
