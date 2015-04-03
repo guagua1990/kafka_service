@@ -16,9 +16,8 @@ public class ConsumerRunner {
 
     ChannelHub channelHub = new ChannelHub();
 
-    ExecutorService executor = Executors.newFixedThreadPool(3);
-    executor.submit(channelHub);
-    executor.submit(logConsumerThread);
-    executor.submit(sendStatsSignalThread);
+    channelHub.run();
+    logConsumerThread.run();
+    sendStatsSignalThread.run();
   }
 }

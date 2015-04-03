@@ -51,38 +51,53 @@ public class StatsMerger extends Thread {
         String statJsonString = object.getString(JsonFactory.STAT);
 
         statsSummer.summStatJson(statsType, statJsonString);
-        updateDb(statsSummer, statJsonString);
+        System.out.println(statJsonString);
+        updateDb(statsSummer, statsType, statJsonString);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void updateDb(StatsSummer statsSummer, String statJsonString) throws Exception {
+  private void updateDb(StatsSummer statsSummer, JsonFactory.StatsType statsType, String statJsonString) throws Exception {
+    if (statsType != JsonFactory.StatsType.TOTAL_COUNT && statsType != JsonFactory.StatsType.ERROR_COUNT) {
+      return;
+    }
+
     JSONObject object = new JSONObject(statJsonString);
     long jobId = object.getLong(JsonFactory.JOB_ID);
     long ircId = object.getLong(JsonFactory.IRC_ID);
     long fieldId = object.getLong(JsonFactory.FIELD_ID);
-    long totalCount = statsSummer.getTotalCount(jobId, ircId, fieldId);
-    long errorCount = statsSummer.getErrorCount(jobId, ircId, fieldId);
-
+    long count = 0L;
     long timestamp = System.currentTimeMillis();
+    if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
+      count = statsSummer.getTotalCount(jobId, ircId, fieldId);
+    } else {
+      count = statsSummer.getErrorCount(jobId, ircId, fieldId);
+    }
 
     Set<JobStat> jobStats = jobStatPersist.query()
         .jobId(jobId)
         .find();
 
     if (jobStats.isEmpty()) {
-      jobStatPersist.create(jobId, errorCount, totalCount, 0L, timestamp, timestamp);
+      if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
+        jobStatPersist.create(jobId, 0L, count, 0L, timestamp, timestamp);
+      } else {
+        jobStatPersist.create(jobId, count, 0L, 0L, timestamp, timestamp);
+      }
     } else {
       JobStat jobStat = jobStats.iterator().next();
-      totalCount += jobStat.getCountActualTotal();
-      errorCount += jobStat.getCountError();
 
-      jobStat.setCountActualTotal(totalCount)
-          .setCountError(errorCount)
-          .setUpdatedAt(timestamp)
-          .save();
+      if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
+        count += jobStat.getCountActualTotal();
+        jobStat.setCountActualTotal(count);
+      } else {
+        count += jobStat.getCountError();
+        jobStat.setCountError(count);
+      }
+
+      jobStat.setUpdatedAt(timestamp).save();
     }
   }
 

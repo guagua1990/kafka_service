@@ -4,7 +4,7 @@ import com.liveramp.kafka_service.producer.AttributionLogGenerator;
 
 public class ConsumerConstants {
   public final static String MERGER_TOPIC = "stats_merge";
-  public final static String TOTAL_STATS_TOPIC = "total_stats";
+  public final static String TOTAL_STATS_TOPIC = "total_requests_per_chunk";
   public final static String READ_TOPIC = AttributionLogGenerator.GOOD_REQUEST_CATEGORY;
   public final static int PORT = 4444;
   public final static String DELIMITER = "attribution: ";

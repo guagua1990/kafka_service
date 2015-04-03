@@ -51,6 +51,7 @@ public class TotalStatsConsumer extends Thread {
         long chunkId = Long.parseLong(params[1]);
         long requestsNum = Long.parseLong(params[2]);
 
+        System.out.println(statsEntry);
         updateDb(jobId, chunkId, requestsNum);
       }
     } catch (Exception e) {

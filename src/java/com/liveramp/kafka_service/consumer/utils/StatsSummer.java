@@ -93,25 +93,37 @@ public class StatsSummer {
     JSONObject json = new JSONObject(statsJsonString);
     switch (type) {
       case TOTAL_COUNT:
-        long count = totalCountMap
+        Long count = totalCountMap
             .get(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
                 json.getLong(JsonFactory.FIELD_ID));
+        if (count == null) {
+          count = 0L;
+        }
         totalCountMap.put(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
             json.getLong(JsonFactory.FIELD_ID), count + json.getLong(JsonFactory.COUNT));
+        break;
       case TRANSACTION_VALUE:
-        double value = valueMap
+        Double value = valueMap
             .get(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
                 json.getLong(JsonFactory.FIELD_ID));
+        if (value == null) {
+          value = 0.0;
+        }
         valueMap
             .put(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
                 json.getLong(JsonFactory.FIELD_ID), value + json.getDouble(JsonFactory.COUNT));
+        break;
       case ERROR_COUNT:
-        long count1 = errorCountMap
+        Long count1 = errorCountMap
             .get(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
                 getCombinedKey(json.getLong(JsonFactory.FIELD_ID), json.getLong(JsonFactory.CATEGORY_ENUM_ID)));
+        if (count1 == null) {
+          count1 = 0L;
+        }
         errorCountMap
             .put(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
                 getCombinedKey(json.getLong(JsonFactory.FIELD_ID), json.getLong(JsonFactory.CATEGORY_ENUM_ID)), count1 + json.getLong(JsonFactory.COUNT));
+        break;
       default:
         break;
     }
