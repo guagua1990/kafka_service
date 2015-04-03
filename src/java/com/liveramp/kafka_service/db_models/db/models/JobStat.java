@@ -26,16 +26,14 @@ import com.liveramp.kafka_service.db_models.IDatabases;
 
 public class JobStat extends ModelWithId<JobStat, IDatabases> implements Comparable<JobStat>{
   
-  public static final long serialVersionUID = -299361979266848573L;
+  public static final long serialVersionUID = -8761628191546601725L;
 
   public static class Tbl extends AbstractTable {
     public final Column ID;
     public final Column JOB_ID;
-    public final Column IRC_ID;
-    public final Column FIELD_ID;
-    public final Column COUNT_SUCCESS;
-    public final Column COUNT_FAILURE;
-    public final Column COUNT_TOTAL;
+    public final Column COUNT_ERROR;
+    public final Column COUNT_ACTUAL_TOTAL;
+    public final Column COUNT_EXPECTED_TOTAL;
     public final Column CREATED_AT;
     public final Column UPDATED_AT;
 
@@ -43,14 +41,12 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
       super("job_stats", alias);
       this.ID = Column.fromId(alias);
       this.JOB_ID = Column.fromField(alias, _Fields.job_id, Long.class);
-      this.IRC_ID = Column.fromField(alias, _Fields.irc_id, Long.class);
-      this.FIELD_ID = Column.fromField(alias, _Fields.field_id, Long.class);
-      this.COUNT_SUCCESS = Column.fromField(alias, _Fields.count_success, Long.class);
-      this.COUNT_FAILURE = Column.fromField(alias, _Fields.count_failure, Long.class);
-      this.COUNT_TOTAL = Column.fromField(alias, _Fields.count_total, Long.class);
+      this.COUNT_ERROR = Column.fromField(alias, _Fields.count_error, Long.class);
+      this.COUNT_ACTUAL_TOTAL = Column.fromField(alias, _Fields.count_actual_total, Long.class);
+      this.COUNT_EXPECTED_TOTAL = Column.fromField(alias, _Fields.count_expected_total, Long.class);
       this.CREATED_AT = Column.fromField(alias, _Fields.created_at, Long.class);
       this.UPDATED_AT = Column.fromField(alias, _Fields.updated_at, Long.class);
-      Collections.addAll(this.allColumns, ID, JOB_ID, IRC_ID, FIELD_ID, COUNT_SUCCESS, COUNT_FAILURE, COUNT_TOTAL, CREATED_AT, UPDATED_AT);
+      Collections.addAll(this.allColumns, ID, JOB_ID, COUNT_ERROR, COUNT_ACTUAL_TOTAL, COUNT_EXPECTED_TOTAL, CREATED_AT, UPDATED_AT);
     }
 
     public static Tbl as(String alias) {
@@ -61,11 +57,9 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
   public static final Tbl TBL = new Tbl("job_stats");
   public static final Column ID = TBL.ID;
   public static final Column JOB_ID = TBL.JOB_ID;
-  public static final Column IRC_ID = TBL.IRC_ID;
-  public static final Column FIELD_ID = TBL.FIELD_ID;
-  public static final Column COUNT_SUCCESS = TBL.COUNT_SUCCESS;
-  public static final Column COUNT_FAILURE = TBL.COUNT_FAILURE;
-  public static final Column COUNT_TOTAL = TBL.COUNT_TOTAL;
+  public static final Column COUNT_ERROR = TBL.COUNT_ERROR;
+  public static final Column COUNT_ACTUAL_TOTAL = TBL.COUNT_ACTUAL_TOTAL;
+  public static final Column COUNT_EXPECTED_TOTAL = TBL.COUNT_EXPECTED_TOTAL;
   public static final Column CREATED_AT = TBL.CREATED_AT;
   public static final Column UPDATED_AT = TBL.UPDATED_AT;
 
@@ -77,11 +71,9 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
 
   public enum _Fields {
     job_id,
-    irc_id,
-    field_id,
-    count_success,
-    count_failure,
-    count_total,
+    count_error,
+    count_actual_total,
+    count_expected_total,
     created_at,
     updated_at,
   }
@@ -94,48 +86,48 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
     return cachedTypedId;
   }
 
-  public JobStat(long id, final long job_id, final long irc_id, final long field_id, final Long count_success, final Long count_failure, final Long count_total, final long created_at, final long updated_at, IDatabases databases) {
+  public JobStat(long id, final long job_id, final Long count_error, final Long count_actual_total, final Long count_expected_total, final long created_at, final long updated_at, IDatabases databases) {
     super(databases);
-    attributes = new Attributes(id, job_id, irc_id, field_id, count_success, count_failure, count_total, created_at, updated_at);
+    attributes = new Attributes(id, job_id, count_error, count_actual_total, count_expected_total, created_at, updated_at);
   }
 
-  public JobStat(long id, final long job_id, final long irc_id, final long field_id, final Long count_success, final Long count_failure, final Long count_total, final long created_at, final long updated_at) {
+  public JobStat(long id, final long job_id, final Long count_error, final Long count_actual_total, final Long count_expected_total, final long created_at, final long updated_at) {
     super(null);
-    attributes = new Attributes(id, job_id, irc_id, field_id, count_success, count_failure, count_total, created_at, updated_at);
+    attributes = new Attributes(id, job_id, count_error, count_actual_total, count_expected_total, created_at, updated_at);
   }
   
-  public JobStat(long id, final long job_id, final long irc_id, final long field_id, final Long count_success, final Long count_failure, final Long count_total, final long updated_at, IDatabases databases) {
+  public JobStat(long id, final long job_id, final Long count_error, final Long count_actual_total, final Long count_expected_total, final long updated_at, IDatabases databases) {
     super(databases);
-    attributes = new Attributes(id, job_id, irc_id, field_id, count_success, count_failure, count_total, updated_at);
+    attributes = new Attributes(id, job_id, count_error, count_actual_total, count_expected_total, updated_at);
   }
 
-  public JobStat(long id, final long job_id, final long irc_id, final long field_id, final Long count_success, final Long count_failure, final Long count_total, final long updated_at) {
+  public JobStat(long id, final long job_id, final Long count_error, final Long count_actual_total, final Long count_expected_total, final long updated_at) {
     super(null);
-    attributes = new Attributes(id, job_id, irc_id, field_id, count_success, count_failure, count_total, updated_at);
+    attributes = new Attributes(id, job_id, count_error, count_actual_total, count_expected_total, updated_at);
   }
   
-  public JobStat(long id, final long job_id, final long irc_id, final long field_id, final long created_at, final long updated_at, IDatabases databases) {
+  public JobStat(long id, final long job_id, final long created_at, final long updated_at, IDatabases databases) {
     super(databases);
-    attributes = new Attributes(id, job_id, irc_id, field_id, created_at, updated_at);
+    attributes = new Attributes(id, job_id, created_at, updated_at);
   }
 
-  public JobStat(long id, final long job_id, final long irc_id, final long field_id, final long created_at, final long updated_at) {
+  public JobStat(long id, final long job_id, final long created_at, final long updated_at) {
     super(null);
-    attributes = new Attributes(id, job_id, irc_id, field_id, created_at, updated_at);
+    attributes = new Attributes(id, job_id, created_at, updated_at);
   }
    
-  public JobStat(long id, final long job_id, final long irc_id, final long field_id, final long updated_at, IDatabases databases) {
+  public JobStat(long id, final long job_id, final long updated_at, IDatabases databases) {
     super(databases);
-    attributes = new Attributes(id, job_id, irc_id, field_id, updated_at);
+    attributes = new Attributes(id, job_id, updated_at);
   }
 
-  public JobStat(long id, final long job_id, final long irc_id, final long field_id, final long updated_at) {
+  public JobStat(long id, final long job_id, final long updated_at) {
     super(null);
-    attributes = new Attributes(id, job_id, irc_id, field_id, updated_at);
+    attributes = new Attributes(id, job_id, updated_at);
   }
 
   public static JobStat newDefaultInstance(long id) {
-    return new JobStat(id, 0L, 0L, 0L, 0L, 0L);
+    return new JobStat(id, 0L, 0L, 0L);
   }
 
   public JobStat(Attributes attributes, IDatabases databases) {
@@ -179,52 +171,32 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
     return this;
   }
 
-  public long getIrcId(){
-    return attributes.getIrcId();
+  public Long getCountError(){
+    return attributes.getCountError();
   }
 
-  public JobStat setIrcId(long newval){
-    attributes.setIrcId(newval);
+  public JobStat setCountError(Long newval){
+    attributes.setCountError(newval);
     cachedHashCode = 0;
     return this;
   }
 
-  public long getFieldId(){
-    return attributes.getFieldId();
+  public Long getCountActualTotal(){
+    return attributes.getCountActualTotal();
   }
 
-  public JobStat setFieldId(long newval){
-    attributes.setFieldId(newval);
+  public JobStat setCountActualTotal(Long newval){
+    attributes.setCountActualTotal(newval);
     cachedHashCode = 0;
     return this;
   }
 
-  public Long getCountSuccess(){
-    return attributes.getCountSuccess();
+  public Long getCountExpectedTotal(){
+    return attributes.getCountExpectedTotal();
   }
 
-  public JobStat setCountSuccess(Long newval){
-    attributes.setCountSuccess(newval);
-    cachedHashCode = 0;
-    return this;
-  }
-
-  public Long getCountFailure(){
-    return attributes.getCountFailure();
-  }
-
-  public JobStat setCountFailure(Long newval){
-    attributes.setCountFailure(newval);
-    cachedHashCode = 0;
-    return this;
-  }
-
-  public Long getCountTotal(){
-    return attributes.getCountTotal();
-  }
-
-  public JobStat setCountTotal(Long newval){
-    attributes.setCountTotal(newval);
+  public JobStat setCountExpectedTotal(Long newval){
+    attributes.setCountExpectedTotal(newval);
     cachedHashCode = 0;
     return this;
   }
@@ -254,20 +226,14 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
       case job_id:
         setJobId((Long) value);
         break;
-      case irc_id:
-        setIrcId((Long) value);
+      case count_error:
+        setCountError((Long) value);
         break;
-      case field_id:
-        setFieldId((Long) value);
+      case count_actual_total:
+        setCountActualTotal((Long) value);
         break;
-      case count_success:
-        setCountSuccess((Long) value);
-        break;
-      case count_failure:
-        setCountFailure((Long) value);
-        break;
-      case count_total:
-        setCountTotal((Long) value);
+      case count_expected_total:
+        setCountExpectedTotal((Long) value);
         break;
       case created_at:
         setCreatedAt((Long) value);
@@ -285,24 +251,16 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
       setJobId((Long)  value);
       return;
     }
-    if (fieldName.equals("irc_id")) {
-      setIrcId((Long)  value);
+    if (fieldName.equals("count_error")) {
+      setCountError((Long)  value);
       return;
     }
-    if (fieldName.equals("field_id")) {
-      setFieldId((Long)  value);
+    if (fieldName.equals("count_actual_total")) {
+      setCountActualTotal((Long)  value);
       return;
     }
-    if (fieldName.equals("count_success")) {
-      setCountSuccess((Long)  value);
-      return;
-    }
-    if (fieldName.equals("count_failure")) {
-      setCountFailure((Long)  value);
-      return;
-    }
-    if (fieldName.equals("count_total")) {
-      setCountTotal((Long)  value);
+    if (fieldName.equals("count_expected_total")) {
+      setCountExpectedTotal((Long)  value);
       return;
     }
     if (fieldName.equals("created_at")) {
@@ -320,15 +278,11 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
     switch (field) {
       case job_id:
         return long.class;
-      case irc_id:
-        return long.class;
-      case field_id:
-        return long.class;
-      case count_success:
+      case count_error:
         return Long.class;
-      case count_failure:
+      case count_actual_total:
         return Long.class;
-      case count_total:
+      case count_expected_total:
         return Long.class;
       case created_at:
         return long.class;
@@ -343,19 +297,13 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
     if (fieldName.equals("job_id")) {
       return long.class;
     }
-    if (fieldName.equals("irc_id")) {
-      return long.class;
-    }
-    if (fieldName.equals("field_id")) {
-      return long.class;
-    }
-    if (fieldName.equals("count_success")) {
+    if (fieldName.equals("count_error")) {
       return Long.class;
     }
-    if (fieldName.equals("count_failure")) {
+    if (fieldName.equals("count_actual_total")) {
       return Long.class;
     }
-    if (fieldName.equals("count_total")) {
+    if (fieldName.equals("count_expected_total")) {
       return Long.class;
     }
     if (fieldName.equals("created_at")) {
@@ -375,20 +323,14 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
     if (fieldName.equals("job_id")) {
       return getJobId();
     }
-    if (fieldName.equals("irc_id")) {
-      return getIrcId();
+    if (fieldName.equals("count_error")) {
+      return getCountError();
     }
-    if (fieldName.equals("field_id")) {
-      return getFieldId();
+    if (fieldName.equals("count_actual_total")) {
+      return getCountActualTotal();
     }
-    if (fieldName.equals("count_success")) {
-      return getCountSuccess();
-    }
-    if (fieldName.equals("count_failure")) {
-      return getCountFailure();
-    }
-    if (fieldName.equals("count_total")) {
-      return getCountTotal();
+    if (fieldName.equals("count_expected_total")) {
+      return getCountExpectedTotal();
     }
     if (fieldName.equals("created_at")) {
       return getCreatedAt();
@@ -403,16 +345,12 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
     switch (field) {
       case job_id:
         return getJobId();
-      case irc_id:
-        return getIrcId();
-      case field_id:
-        return getFieldId();
-      case count_success:
-        return getCountSuccess();
-      case count_failure:
-        return getCountFailure();
-      case count_total:
-        return getCountTotal();
+      case count_error:
+        return getCountError();
+      case count_actual_total:
+        return getCountActualTotal();
+      case count_expected_total:
+        return getCountExpectedTotal();
       case created_at:
         return getCreatedAt();
       case updated_at:
@@ -428,19 +366,13 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
     if (fieldName.equals("job_id")) {
       return true;
     }
-    if (fieldName.equals("irc_id")) {
+    if (fieldName.equals("count_error")) {
       return true;
     }
-    if (fieldName.equals("field_id")) {
+    if (fieldName.equals("count_actual_total")) {
       return true;
     }
-    if (fieldName.equals("count_success")) {
-      return true;
-    }
-    if (fieldName.equals("count_failure")) {
-      return true;
-    }
-    if (fieldName.equals("count_total")) {
+    if (fieldName.equals("count_expected_total")) {
       return true;
     }
     if (fieldName.equals("created_at")) {
@@ -456,15 +388,11 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
     switch (field) {
       case job_id:
         return null;
-      case irc_id:
-        return null;
-      case field_id:
-        return null;
-      case count_success:
+      case count_error:
         return 0;
-      case count_failure:
+      case count_actual_total:
         return 0;
-      case count_total:
+      case count_expected_total:
         return 0;
       case created_at:
         return null;
@@ -498,11 +426,9 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
   public String toString() {
     return "<JobStat"
       + " job_id: " + getJobId()
-      + " irc_id: " + getIrcId()
-      + " field_id: " + getFieldId()
-      + " count_success: " + getCountSuccess()
-      + " count_failure: " + getCountFailure()
-      + " count_total: " + getCountTotal()
+      + " count_error: " + getCountError()
+      + " count_actual_total: " + getCountActualTotal()
+      + " count_expected_total: " + getCountExpectedTotal()
       + " created_at: " + getCreatedAt()
       + " updated_at: " + getUpdatedAt()
       + ">";
@@ -519,15 +445,13 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
   
   public static class Attributes extends AttributesWithId {
     
-    public static final long serialVersionUID = -299361979266848573L;
+    public static final long serialVersionUID = -8761628191546601725L;
 
     // Fields
     private long __job_id;
-    private long __irc_id;
-    private long __field_id;
-    private Long __count_success;
-    private Long __count_failure;
-    private Long __count_total;
+    private Long __count_error;
+    private Long __count_actual_total;
+    private Long __count_expected_total;
     private long __created_at;
     private long __updated_at;
 
@@ -535,71 +459,59 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
       super(id);
     }
 
-    public Attributes(long id, final long job_id, final long irc_id, final long field_id, final Long count_success, final Long count_failure, final Long count_total, final long created_at, final long updated_at) {
+    public Attributes(long id, final long job_id, final Long count_error, final Long count_actual_total, final Long count_expected_total, final long created_at, final long updated_at) {
       super(id);
       this.__job_id = job_id;
-      this.__irc_id = irc_id;
-      this.__field_id = field_id;
-      this.__count_success = count_success;
-      this.__count_failure = count_failure;
-      this.__count_total = count_total;
+      this.__count_error = count_error;
+      this.__count_actual_total = count_actual_total;
+      this.__count_expected_total = count_expected_total;
       this.__created_at = created_at;
       this.__updated_at = updated_at;
     }
     
-    public Attributes(long id, final long job_id, final long irc_id, final long field_id, final Long count_success, final Long count_failure, final Long count_total, final long updated_at) {
+    public Attributes(long id, final long job_id, final Long count_error, final Long count_actual_total, final Long count_expected_total, final long updated_at) {
       super(id);
       this.__job_id = job_id;
-      this.__irc_id = irc_id;
-      this.__field_id = field_id;
-      this.__count_success = count_success;
-      this.__count_failure = count_failure;
-      this.__count_total = count_total;
+      this.__count_error = count_error;
+      this.__count_actual_total = count_actual_total;
+      this.__count_expected_total = count_expected_total;
       this.__updated_at = updated_at;
       this.__created_at = System.currentTimeMillis();
     }
     
-    public Attributes(long id, final long job_id, final long irc_id, final long field_id, final long created_at, final long updated_at) {
+    public Attributes(long id, final long job_id, final long created_at, final long updated_at) {
       super(id);
       this.__job_id = job_id;
-      this.__irc_id = irc_id;
-      this.__field_id = field_id;
       this.__created_at = created_at;
       this.__updated_at = updated_at;
     }
     
-    public Attributes(long id, final long job_id, final long irc_id, final long field_id, final long updated_at) {
+    public Attributes(long id, final long job_id, final long updated_at) {
       super(id);
       this.__job_id = job_id;
-      this.__irc_id = irc_id;
-      this.__field_id = field_id;
       this.__updated_at = updated_at;
       this.__created_at = System.currentTimeMillis();
     }
 
     public static Attributes newDefaultInstance(long id) {
-      return new Attributes(id, 0L, 0L, 0L, 0L, 0L);
+      return new Attributes(id, 0L, 0L, 0L);
     }
 
     public Attributes(long id, Map<Enum, Object> fieldsMap) {
       super(id);
       long job_id = (Long) fieldsMap.get(JobStat._Fields.job_id);
-      long irc_id = (Long) fieldsMap.get(JobStat._Fields.irc_id);
-      long field_id = (Long) fieldsMap.get(JobStat._Fields.field_id);
-      Long count_success_tmp = (Long) fieldsMap.get(JobStat._Fields.count_success);
-      Long count_success = count_success_tmp == null ? 0 : count_success_tmp;
-      Long count_failure_tmp = (Long) fieldsMap.get(JobStat._Fields.count_failure);
-      Long count_failure = count_failure_tmp == null ? 0 : count_failure_tmp;
-      Long count_total_tmp = (Long) fieldsMap.get(JobStat._Fields.count_total);
-      Long count_total = count_total_tmp == null ? 0 : count_total_tmp;
+      Long count_error_tmp = (Long) fieldsMap.get(JobStat._Fields.count_error);
+      Long count_error = count_error_tmp == null ? 0 : count_error_tmp;
+      Long count_actual_total_tmp = (Long) fieldsMap.get(JobStat._Fields.count_actual_total);
+      Long count_actual_total = count_actual_total_tmp == null ? 0 : count_actual_total_tmp;
+      Long count_expected_total_tmp = (Long) fieldsMap.get(JobStat._Fields.count_expected_total);
+      Long count_expected_total = count_expected_total_tmp == null ? 0 : count_expected_total_tmp;
       long created_at = (Long) fieldsMap.get(JobStat._Fields.created_at);
       long updated_at = (Long) fieldsMap.get(JobStat._Fields.updated_at);
       this.__job_id = job_id;
-      this.__irc_id = irc_id;
-      this.__field_id = field_id;
-      this.__count_success = count_success;
-      this.__count_failure = count_failure;
-      this.__count_total = count_total;
+      this.__count_error = count_error;
+      this.__count_actual_total = count_actual_total;
+      this.__count_expected_total = count_expected_total;
       this.__created_at = created_at;
       this.__updated_at = updated_at;
     }
@@ -607,11 +519,9 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
     public Attributes(Attributes other) {
       super(other.getId());
       this.__job_id = other.getJobId();
-      this.__irc_id = other.getIrcId();
-      this.__field_id = other.getFieldId();
-      this.__count_success = other.getCountSuccess();
-      this.__count_failure = other.getCountFailure();
-      this.__count_total = other.getCountTotal();
+      this.__count_error = other.getCountError();
+      this.__count_actual_total = other.getCountActualTotal();
+      this.__count_expected_total = other.getCountExpectedTotal();
       this.__created_at = other.getCreatedAt();
       this.__updated_at = other.getUpdatedAt();
     }
@@ -626,52 +536,32 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
       return this;
     }
 
-    public long getIrcId(){
-      return __irc_id;
+    public Long getCountError(){
+      return __count_error;
     }
 
-    public Attributes setIrcId(long newval){
-      this.__irc_id = newval;
+    public Attributes setCountError(Long newval){
+      this.__count_error = newval;
       cachedHashCode = 0;
       return this;
     }
 
-    public long getFieldId(){
-      return __field_id;
+    public Long getCountActualTotal(){
+      return __count_actual_total;
     }
 
-    public Attributes setFieldId(long newval){
-      this.__field_id = newval;
+    public Attributes setCountActualTotal(Long newval){
+      this.__count_actual_total = newval;
       cachedHashCode = 0;
       return this;
     }
 
-    public Long getCountSuccess(){
-      return __count_success;
+    public Long getCountExpectedTotal(){
+      return __count_expected_total;
     }
 
-    public Attributes setCountSuccess(Long newval){
-      this.__count_success = newval;
-      cachedHashCode = 0;
-      return this;
-    }
-
-    public Long getCountFailure(){
-      return __count_failure;
-    }
-
-    public Attributes setCountFailure(Long newval){
-      this.__count_failure = newval;
-      cachedHashCode = 0;
-      return this;
-    }
-
-    public Long getCountTotal(){
-      return __count_total;
-    }
-
-    public Attributes setCountTotal(Long newval){
-      this.__count_total = newval;
+    public Attributes setCountExpectedTotal(Long newval){
+      this.__count_expected_total = newval;
       cachedHashCode = 0;
       return this;
     }
@@ -701,20 +591,14 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
         case job_id:
           setJobId((Long) value);
           break;
-        case irc_id:
-          setIrcId((Long) value);
+        case count_error:
+          setCountError((Long) value);
           break;
-        case field_id:
-          setFieldId((Long) value);
+        case count_actual_total:
+          setCountActualTotal((Long) value);
           break;
-        case count_success:
-          setCountSuccess((Long) value);
-          break;
-        case count_failure:
-          setCountFailure((Long) value);
-          break;
-        case count_total:
-          setCountTotal((Long) value);
+        case count_expected_total:
+          setCountExpectedTotal((Long) value);
           break;
         case created_at:
           setCreatedAt((Long) value);
@@ -732,24 +616,16 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
         setJobId((Long)  value);
         return;
       }
-      if (fieldName.equals("irc_id")) {
-        setIrcId((Long)  value);
+      if (fieldName.equals("count_error")) {
+        setCountError((Long)  value);
         return;
       }
-      if (fieldName.equals("field_id")) {
-        setFieldId((Long)  value);
+      if (fieldName.equals("count_actual_total")) {
+        setCountActualTotal((Long)  value);
         return;
       }
-      if (fieldName.equals("count_success")) {
-        setCountSuccess((Long)  value);
-        return;
-      }
-      if (fieldName.equals("count_failure")) {
-        setCountFailure((Long)  value);
-        return;
-      }
-      if (fieldName.equals("count_total")) {
-        setCountTotal((Long)  value);
+      if (fieldName.equals("count_expected_total")) {
+        setCountExpectedTotal((Long)  value);
         return;
       }
       if (fieldName.equals("created_at")) {
@@ -767,15 +643,11 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
       switch (field) {
         case job_id:
           return long.class;
-        case irc_id:
-          return long.class;
-        case field_id:
-          return long.class;
-        case count_success:
+        case count_error:
           return Long.class;
-        case count_failure:
+        case count_actual_total:
           return Long.class;
-        case count_total:
+        case count_expected_total:
           return Long.class;
         case created_at:
           return long.class;
@@ -790,19 +662,13 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
       if (fieldName.equals("job_id")) {
         return long.class;
       }
-      if (fieldName.equals("irc_id")) {
-        return long.class;
-      }
-      if (fieldName.equals("field_id")) {
-        return long.class;
-      }
-      if (fieldName.equals("count_success")) {
+      if (fieldName.equals("count_error")) {
         return Long.class;
       }
-      if (fieldName.equals("count_failure")) {
+      if (fieldName.equals("count_actual_total")) {
         return Long.class;
       }
-      if (fieldName.equals("count_total")) {
+      if (fieldName.equals("count_expected_total")) {
         return Long.class;
       }
       if (fieldName.equals("created_at")) {
@@ -822,20 +688,14 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
       if (fieldName.equals("job_id")) {
         return getJobId();
       }
-      if (fieldName.equals("irc_id")) {
-        return getIrcId();
+      if (fieldName.equals("count_error")) {
+        return getCountError();
       }
-      if (fieldName.equals("field_id")) {
-        return getFieldId();
+      if (fieldName.equals("count_actual_total")) {
+        return getCountActualTotal();
       }
-      if (fieldName.equals("count_success")) {
-        return getCountSuccess();
-      }
-      if (fieldName.equals("count_failure")) {
-        return getCountFailure();
-      }
-      if (fieldName.equals("count_total")) {
-        return getCountTotal();
+      if (fieldName.equals("count_expected_total")) {
+        return getCountExpectedTotal();
       }
       if (fieldName.equals("created_at")) {
         return getCreatedAt();
@@ -850,16 +710,12 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
       switch (field) {
         case job_id:
           return getJobId();
-        case irc_id:
-          return getIrcId();
-        case field_id:
-          return getFieldId();
-        case count_success:
-          return getCountSuccess();
-        case count_failure:
-          return getCountFailure();
-        case count_total:
-          return getCountTotal();
+        case count_error:
+          return getCountError();
+        case count_actual_total:
+          return getCountActualTotal();
+        case count_expected_total:
+          return getCountExpectedTotal();
         case created_at:
           return getCreatedAt();
         case updated_at:
@@ -875,19 +731,13 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
       if (fieldName.equals("job_id")) {
         return true;
       }
-      if (fieldName.equals("irc_id")) {
+      if (fieldName.equals("count_error")) {
         return true;
       }
-      if (fieldName.equals("field_id")) {
+      if (fieldName.equals("count_actual_total")) {
         return true;
       }
-      if (fieldName.equals("count_success")) {
-        return true;
-      }
-      if (fieldName.equals("count_failure")) {
-        return true;
-      }
-      if (fieldName.equals("count_total")) {
+      if (fieldName.equals("count_expected_total")) {
         return true;
       }
       if (fieldName.equals("created_at")) {
@@ -903,15 +753,11 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
       switch (field) {
         case job_id:
           return null;
-        case irc_id:
-          return null;
-        case field_id:
-          return null;
-        case count_success:
+        case count_error:
           return 0;
-        case count_failure:
+        case count_actual_total:
           return 0;
-        case count_total:
+        case count_expected_total:
           return 0;
         case created_at:
           return null;
@@ -930,11 +776,9 @@ public class JobStat extends ModelWithId<JobStat, IDatabases> implements Compara
     public String toString() {
       return "<JobStat.Attributes"
         + " job_id: " + getJobId()
-        + " irc_id: " + getIrcId()
-        + " field_id: " + getFieldId()
-        + " count_success: " + getCountSuccess()
-        + " count_failure: " + getCountFailure()
-        + " count_total: " + getCountTotal()
+        + " count_error: " + getCountError()
+        + " count_actual_total: " + getCountActualTotal()
+        + " count_expected_total: " + getCountExpectedTotal()
         + " created_at: " + getCreatedAt()
         + " updated_at: " + getUpdatedAt()
         + ">";
