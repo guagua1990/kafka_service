@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import com.google.common.collect.Maps;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
@@ -28,6 +29,8 @@ public class StatsMerger extends Thread {
   private final IKafkaService db;
   private final IJobStatPersistence jobStatPersist;
   private final ConsumerConnector consumerConnector;
+  private final Map<Long, Long> jobToTotal;
+  private final Map<Long, Long> jobToError;
 
   public static void main(String[] args) throws FileNotFoundException {
     StatsMerger logConsumer = new StatsMerger();
@@ -37,8 +40,11 @@ public class StatsMerger extends Thread {
   public StatsMerger() throws FileNotFoundException {
     db = new DatabasesImpl().getKafkaService();
     db.disableCaching();
+    db.setAutoCommit(true);
     jobStatPersist = db.jobStats();
     consumerConnector = getConsumerConnector();
+    jobToTotal = Maps.newHashMap();
+    jobToError = Maps.newHashMap();
   }
 
   @Override
@@ -61,7 +67,6 @@ public class StatsMerger extends Thread {
   }
 
   private void updateDb(JsonFactory.StatsType statsType, String statJsonString) throws Exception {
-    db.setAutoCommit(false);
     if (statsType != JsonFactory.StatsType.TOTAL_COUNT && statsType != JsonFactory.StatsType.ERROR_COUNT) {
       return;
     }
@@ -70,33 +75,33 @@ public class StatsMerger extends Thread {
     long jobId = object.getLong(JsonFactory.JOB_ID);
     long count = object.getLong(JsonFactory.COUNT);
 
-    Set<JobStat> jobStats = jobStatPersist.query()
-        .jobId(jobId)
-        .find();
 
     long timestamp = System.currentTimeMillis();
 
-    if (jobStats.isEmpty()) {
-      if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
+    if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
+      if (!jobToTotal.containsKey(jobId)) {
+        jobToTotal.put(jobId, count);
         jobStatPersist.create(jobId, 0L, count, 0L, timestamp, timestamp);
       } else {
-        jobStatPersist.create(jobId, count, 0L, 0L, timestamp, timestamp);
+        jobToTotal.put(jobId, count + jobToTotal.get(jobId));
+        getOneOrThrowException(jobStatPersist.query()
+            .jobId(jobId)
+            .find())
+            .setCountActualTotal(jobToTotal.get(jobId))
+            .setUpdatedAt(timestamp).save();
       }
     } else {
-      JobStat jobStat = getOneOrThrowException(jobStats);
-
-      if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
-        count += jobStat.getCountActualTotal();
-        jobStat.setCountActualTotal(count);
+      if (!jobToError.containsKey(jobId)) {
+        jobStatPersist.create(jobId, count, 0L, 0L, timestamp, timestamp);
       } else {
-        count += jobStat.getCountError();
-        jobStat.setCountError(count);
+        jobToError.put(jobId, count + jobToError.get(jobId));
+        getOneOrThrowException(jobStatPersist.query()
+            .jobId(jobId)
+            .find())
+            .setCountError(jobToError.get(jobId))
+            .setUpdatedAt(timestamp).save();
       }
-
-      jobStat.setUpdatedAt(timestamp).save();
     }
-    db.commit();
-    db.setAutoCommit(true);
   }
 
   private JobStat getOneOrThrowException(Set<JobStat> jobStats) {
@@ -112,7 +117,7 @@ public class StatsMerger extends Thread {
     Properties properties = new Properties();
     Map map = (Map)YAML.load(new FileReader("config/zookeeper-client.yaml"));
     properties.put("zookeeper.connect", map.get("zookeeper.connect"));
-    properties.put("group.id","test-par-1");
+    properties.put("group.id", "test-par-1");
     ConsumerConfig consumerConfig = new ConsumerConfig(properties);
     return Consumer.createJavaConsumerConnector(consumerConfig);
   }
@@ -121,7 +126,7 @@ public class StatsMerger extends Thread {
     Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
     topicCountMap.put(ConsumerConstants.MERGER_TOPIC, 1);
     Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumerConnector.createMessageStreams(topicCountMap);
-    KafkaStream<byte[], byte[]> stream =  consumerMap.get(ConsumerConstants.MERGER_TOPIC).get(0);
+    KafkaStream<byte[], byte[]> stream = consumerMap.get(ConsumerConstants.MERGER_TOPIC).get(0);
     return stream.iterator();
   }
 }
