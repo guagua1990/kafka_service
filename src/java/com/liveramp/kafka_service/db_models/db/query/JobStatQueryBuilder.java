@@ -97,6 +97,46 @@ public class JobStatQueryBuilder extends AbstractQueryBuilder<JobStat> {
     return this;
   }
 
+  public JobStatQueryBuilder ircId(Long value) {
+    addWhereConstraint(new WhereConstraint<Long>(JobStat._Fields.irc_id, JackMatchers.equalTo(value)));
+    return this;
+  }
+
+  public JobStatQueryBuilder whereIrcId(IWhereOperator<Long> operator) {
+    addWhereConstraint(new WhereConstraint<Long>(JobStat._Fields.irc_id, operator));
+    return this;
+  }
+  
+  public JobStatQueryBuilder orderByIrcId() {
+    this.addOrder(new OrderCriterion(JobStat._Fields.irc_id, QueryOrder.ASC));
+    return this;
+  }
+  
+  public JobStatQueryBuilder orderByIrcId(QueryOrder queryOrder) {
+    this.addOrder(new OrderCriterion(JobStat._Fields.irc_id, queryOrder));
+    return this;
+  }
+
+  public JobStatQueryBuilder fieldId(Long value) {
+    addWhereConstraint(new WhereConstraint<Long>(JobStat._Fields.field_id, JackMatchers.equalTo(value)));
+    return this;
+  }
+
+  public JobStatQueryBuilder whereFieldId(IWhereOperator<Long> operator) {
+    addWhereConstraint(new WhereConstraint<Long>(JobStat._Fields.field_id, operator));
+    return this;
+  }
+  
+  public JobStatQueryBuilder orderByFieldId() {
+    this.addOrder(new OrderCriterion(JobStat._Fields.field_id, QueryOrder.ASC));
+    return this;
+  }
+  
+  public JobStatQueryBuilder orderByFieldId(QueryOrder queryOrder) {
+    this.addOrder(new OrderCriterion(JobStat._Fields.field_id, queryOrder));
+    return this;
+  }
+
   public JobStatQueryBuilder countSuccess(Long value) {
     addWhereConstraint(new WhereConstraint<Long>(JobStat._Fields.count_success, JackMatchers.equalTo(value)));
     return this;
@@ -137,6 +177,26 @@ public class JobStatQueryBuilder extends AbstractQueryBuilder<JobStat> {
     return this;
   }
 
+  public JobStatQueryBuilder countTotal(Long value) {
+    addWhereConstraint(new WhereConstraint<Long>(JobStat._Fields.count_total, JackMatchers.equalTo(value)));
+    return this;
+  }
+
+  public JobStatQueryBuilder whereCountTotal(IWhereOperator<Long> operator) {
+    addWhereConstraint(new WhereConstraint<Long>(JobStat._Fields.count_total, operator));
+    return this;
+  }
+  
+  public JobStatQueryBuilder orderByCountTotal() {
+    this.addOrder(new OrderCriterion(JobStat._Fields.count_total, QueryOrder.ASC));
+    return this;
+  }
+  
+  public JobStatQueryBuilder orderByCountTotal(QueryOrder queryOrder) {
+    this.addOrder(new OrderCriterion(JobStat._Fields.count_total, queryOrder));
+    return this;
+  }
+
   public JobStatQueryBuilder createdAt(Long value) {
     addWhereConstraint(new WhereConstraint<Long>(JobStat._Fields.created_at, JackMatchers.equalTo(value)));
     return this;
@@ -174,26 +234,6 @@ public class JobStatQueryBuilder extends AbstractQueryBuilder<JobStat> {
   
   public JobStatQueryBuilder orderByUpdatedAt(QueryOrder queryOrder) {
     this.addOrder(new OrderCriterion(JobStat._Fields.updated_at, queryOrder));
-    return this;
-  }
-
-  public JobStatQueryBuilder countTotal(Long value) {
-    addWhereConstraint(new WhereConstraint<Long>(JobStat._Fields.count_total, JackMatchers.equalTo(value)));
-    return this;
-  }
-
-  public JobStatQueryBuilder whereCountTotal(IWhereOperator<Long> operator) {
-    addWhereConstraint(new WhereConstraint<Long>(JobStat._Fields.count_total, operator));
-    return this;
-  }
-  
-  public JobStatQueryBuilder orderByCountTotal() {
-    this.addOrder(new OrderCriterion(JobStat._Fields.count_total, QueryOrder.ASC));
-    return this;
-  }
-  
-  public JobStatQueryBuilder orderByCountTotal(QueryOrder queryOrder) {
-    this.addOrder(new OrderCriterion(JobStat._Fields.count_total, queryOrder));
     return this;
   }
 }

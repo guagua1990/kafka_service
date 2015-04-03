@@ -15,10 +15,8 @@ public class TestJobStat {
 
   @Test
   public void testJobStatCreation() throws Exception {
-    jobStats.createDefaultInstance()
-        .save();
-
-    jobStats.createDefaultInstance()
-        .save();
+    long timestamp = System.currentTimeMillis();
+    jobStats.create(1, 23, 45, timestamp, timestamp);
+    jobStats.create(2, 24, 58, timestamp, timestamp);
   }
 }

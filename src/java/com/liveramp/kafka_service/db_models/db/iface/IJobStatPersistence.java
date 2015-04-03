@@ -16,15 +16,18 @@ import java.util.Set;
 import com.rapleaf.jack.IModelPersistence;
 
 public interface IJobStatPersistence extends IModelPersistence<JobStat> {
-  public JobStat create(final long job_id, final long count_success, final long count_failure, final long created_at, final long updated_at, final long count_total) throws IOException;
+  public JobStat create(final long job_id, final long irc_id, final long field_id, final Long count_success, final Long count_failure, final Long count_total, final long created_at, final long updated_at) throws IOException;
+  public JobStat create(final long job_id, final long irc_id, final long field_id, final long created_at, final long updated_at) throws IOException;
 
   public JobStat createDefaultInstance() throws IOException;
   public Set<JobStat> findByJobId(long value)  throws IOException;
-  public Set<JobStat> findByCountSuccess(long value)  throws IOException;
-  public Set<JobStat> findByCountFailure(long value)  throws IOException;
+  public Set<JobStat> findByIrcId(long value)  throws IOException;
+  public Set<JobStat> findByFieldId(long value)  throws IOException;
+  public Set<JobStat> findByCountSuccess(Long value)  throws IOException;
+  public Set<JobStat> findByCountFailure(Long value)  throws IOException;
+  public Set<JobStat> findByCountTotal(Long value)  throws IOException;
   public Set<JobStat> findByCreatedAt(long value)  throws IOException;
   public Set<JobStat> findByUpdatedAt(long value)  throws IOException;
-  public Set<JobStat> findByCountTotal(long value)  throws IOException;
 
   public JobStatQueryBuilder query();
 }
