@@ -1,6 +1,7 @@
 package com.liveramp.kafka_service.consumer.utils;
 
 import java.util.List;
+import java.util.Map;
 
 import com.clearspring.analytics.stream.cardinality.HyperLogLogPlus;
 import com.google.common.collect.Lists;
@@ -131,8 +132,16 @@ public class StatsSummer {
     return count == null ? 0 : count;
   }
 
-  public long getErrorCount(long jobId, long ircId, long fieldId, long categoryEnumId) {
-    Long count = errorCountMap.get(getCombinedKey(jobId, ircId), getCombinedKey(fieldId, categoryEnumId));
-    return count == null ? 0 : count;
+  public long getErrorCount(long jobId, long ircId, long fieldId) {
+    Map<String, Long> subMap = errorCountMap.get(getCombinedKey(jobId, ircId));
+
+    long count = 0;
+    for (String combinedKey : subMap.keySet()) {
+      TwoKeyTuple<Long, Long> key2 = separateTwoKeys(combinedKey);
+      if (key2.getK1() == fieldId) {
+        count += subMap.get(combinedKey);
+      }
+    }
+    return count;
   }
 }
