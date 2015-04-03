@@ -70,12 +70,19 @@ public class StatsMerger extends Thread {
 
     Set<JobStat> jobStats = jobStatPersist.query()
         .jobId(jobId)
-        .ircId(ircId)
-        .fieldId(fieldId)
         .find();
 
     if (jobStats.isEmpty()) {
-      jobStatPersist.create(jobId, ircId, fieldId, totalCount - errorCount, errorCount, 0L, timestamp, timestamp);
+      jobStatPersist.create(jobId, errorCount, totalCount, 0L, timestamp, timestamp);
+    } else {
+      JobStat jobStat = jobStats.iterator().next();
+      totalCount += jobStat.getCountActualTotal();
+      errorCount += jobStat.getCountError();
+
+      jobStat.setCountActualTotal(totalCount)
+          .setCountError(errorCount)
+          .setUpdatedAt(timestamp)
+          .save();
     }
   }
 
