@@ -23,14 +23,14 @@ import com.liveramp.kafka_service.db_models.DatabasesImpl;
 import com.liveramp.kafka_service.db_models.db.IKafkaService;
 import com.liveramp.kafka_service.db_models.db.iface.IJobStatPersistence;
 import com.liveramp.kafka_service.db_models.db.models.JobStat;
+import com.rapleaf.support.Pair;
 
 public class StatsMerger extends Thread {
 
   private final IKafkaService db;
   private final IJobStatPersistence jobStatPersist;
   private final ConsumerConnector consumerConnector;
-  private final Map<Long, Long> jobToTotal;
-  private final Map<Long, Long> jobToError;
+  private final Map<Long, Pair<Long, Long>> jobToTotalAndError;
 
   public static void main(String[] args) throws FileNotFoundException {
     StatsMerger logConsumer = new StatsMerger();
@@ -43,8 +43,7 @@ public class StatsMerger extends Thread {
     db.setAutoCommit(true);
     jobStatPersist = db.jobStats();
     consumerConnector = getConsumerConnector();
-    jobToTotal = Maps.newHashMap();
-    jobToError = Maps.newHashMap();
+    jobToTotalAndError = Maps.newHashMap();
   }
 
   @Override
@@ -78,27 +77,29 @@ public class StatsMerger extends Thread {
 
     long timestamp = System.currentTimeMillis();
 
-    if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
-      if (!jobToTotal.containsKey(jobId)) {
-        jobToTotal.put(jobId, count);
+    if (!jobToTotalAndError.containsKey(jobId)) {
+      if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
+        jobToTotalAndError.put(jobId, Pair.makePair(count, 0L));
         jobStatPersist.create(jobId, 0L, count, 0L, timestamp, timestamp);
       } else {
-        jobToTotal.put(jobId, count + jobToTotal.get(jobId));
-        getOneOrThrowException(jobStatPersist.query()
-            .jobId(jobId)
-            .find())
-            .setCountActualTotal(jobToTotal.get(jobId))
-            .setUpdatedAt(timestamp).save();
+        jobToTotalAndError.put(jobId, Pair.makePair(0L, count));
+        jobStatPersist.create(jobId, count, 0L, 0L, timestamp, timestamp);
       }
     } else {
-      if (!jobToError.containsKey(jobId)) {
-        jobStatPersist.create(jobId, count, 0L, 0L, timestamp, timestamp);
-      } else {
-        jobToError.put(jobId, count + jobToError.get(jobId));
+      Pair<Long, Long> pair = jobToTotalAndError.get(jobId);
+      if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
+        jobToTotalAndError.put(jobId, Pair.makePair(count + pair.first, pair.second));
         getOneOrThrowException(jobStatPersist.query()
             .jobId(jobId)
             .find())
-            .setCountError(jobToError.get(jobId))
+            .setCountActualTotal(count + pair.first)
+            .setUpdatedAt(timestamp).save();
+      } else {
+        jobToTotalAndError.put(jobId, Pair.makePair(pair.first, pair.second + count));
+        getOneOrThrowException(jobStatPersist.query()
+            .jobId(jobId)
+            .find())
+            .setCountError(count + pair.second)
             .setUpdatedAt(timestamp).save();
       }
     }
