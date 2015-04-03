@@ -3,6 +3,7 @@ package com.liveramp.kafka_service.consumer;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -17,7 +18,6 @@ import org.json.JSONObject;
 import org.jvyaml.YAML;
 
 import com.liveramp.kafka_service.consumer.utils.JsonFactory;
-import com.liveramp.kafka_service.consumer.utils.StatsSummer;
 import com.liveramp.kafka_service.db_models.DatabasesImpl;
 import com.liveramp.kafka_service.db_models.db.iface.IJobStatPersistence;
 import com.liveramp.kafka_service.db_models.db.models.JobStat;
@@ -26,7 +26,6 @@ public class StatsMerger extends Thread {
 
   private final IJobStatPersistence jobStatPersist;
   private final ConsumerConnector consumerConnector;
-  private final StatsSummer statsSummer;
 
   public static void main(String[] args) throws FileNotFoundException {
     StatsMerger logConsumer = new StatsMerger();
@@ -36,7 +35,6 @@ public class StatsMerger extends Thread {
   public StatsMerger() throws FileNotFoundException {
     jobStatPersist = new DatabasesImpl().getKafkaService().jobStats();
     consumerConnector = getConsumerConnector();
-    statsSummer = new StatsSummer();
   }
 
   @Override
@@ -50,35 +48,28 @@ public class StatsMerger extends Thread {
         JsonFactory.StatsType statsType = JsonFactory.StatsType.valueOf(object.getString(JsonFactory.STATS_TYPE));
         String statJsonString = object.getString(JsonFactory.STAT);
 
-        statsSummer.summStatJson(statsType, statJsonString);
         System.out.println(statJsonString);
-        updateDb(statsSummer, statsType, statJsonString);
+        updateDb(statsType, statJsonString);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void updateDb(StatsSummer statsSummer, JsonFactory.StatsType statsType, String statJsonString) throws Exception {
+  private void updateDb(JsonFactory.StatsType statsType, String statJsonString) throws Exception {
     if (statsType != JsonFactory.StatsType.TOTAL_COUNT && statsType != JsonFactory.StatsType.ERROR_COUNT) {
       return;
     }
 
     JSONObject object = new JSONObject(statJsonString);
     long jobId = object.getLong(JsonFactory.JOB_ID);
-    long ircId = object.getLong(JsonFactory.IRC_ID);
-    long fieldId = object.getLong(JsonFactory.FIELD_ID);
-    long count = 0L;
-    long timestamp = System.currentTimeMillis();
-    if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
-      count = statsSummer.getTotalCount(jobId, ircId, fieldId);
-    } else {
-      count = statsSummer.getErrorCount(jobId, ircId, fieldId);
-    }
+    long count = object.getLong(JsonFactory.COUNT);
 
     Set<JobStat> jobStats = jobStatPersist.query()
         .jobId(jobId)
         .find();
+
+    long timestamp = System.currentTimeMillis();
 
     if (jobStats.isEmpty()) {
       if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
@@ -87,7 +78,7 @@ public class StatsMerger extends Thread {
         jobStatPersist.create(jobId, count, 0L, 0L, timestamp, timestamp);
       }
     } else {
-      JobStat jobStat = jobStats.iterator().next();
+      JobStat jobStat = getOneOrThrowException(jobStats);
 
       if (statsType == JsonFactory.StatsType.TOTAL_COUNT) {
         count += jobStat.getCountActualTotal();
@@ -99,6 +90,15 @@ public class StatsMerger extends Thread {
 
       jobStat.setUpdatedAt(timestamp).save();
     }
+  }
+
+  private JobStat getOneOrThrowException(Set<JobStat> jobStats) {
+    Iterator<JobStat> it = jobStats.iterator();
+    JobStat jobStat = it.next();
+    if (it.hasNext()) {
+      throw new RuntimeException("Job id is not uniq in the table.");
+    }
+    return jobStat;
   }
 
   private static ConsumerConnector getConsumerConnector() throws FileNotFoundException {

@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.clearspring.analytics.stream.cardinality.HyperLogLogPlus;
 import com.google.common.collect.Lists;
-import kafka.utils.Json;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -84,45 +83,35 @@ public class StatsSummer {
     return statJsonStrings;
   }
 
-  public void summStatJson(JsonFactory.StatsType type, String statsJsonString) throws JSONException {
-    JSONObject json = new JSONObject(statsJsonString);
-    switch (type) {
-      case TOTAL_COUNT:
-        Long count = totalCountMap
-            .get(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
-                json.getLong(JsonFactory.FIELD_ID));
-        if (count == null) {
-          count = 0L;
-        }
-        totalCountMap.put(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
-            json.getLong(JsonFactory.FIELD_ID), count + json.getLong(JsonFactory.COUNT));
-        break;
-      case TRANSACTION_VALUE:
-        Double value = valueMap
-            .get(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
-                json.getLong(JsonFactory.FIELD_ID));
-        if (value == null) {
-          value = 0.0;
-        }
-        valueMap
-            .put(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
-                json.getLong(JsonFactory.FIELD_ID), value + json.getDouble(JsonFactory.COUNT));
-        break;
-      case ERROR_COUNT:
-        Long count1 = errorCountMap
-            .get(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
-                getCombinedKey(json.getLong(JsonFactory.FIELD_ID), json.getLong(JsonFactory.CATEGORY_ENUM_ID)));
-        if (count1 == null) {
-          count1 = 0L;
-        }
-        errorCountMap
-            .put(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
-                getCombinedKey(json.getLong(JsonFactory.FIELD_ID), json.getLong(JsonFactory.CATEGORY_ENUM_ID)), count1 + json.getLong(JsonFactory.COUNT));
-        break;
-      default:
-        break;
-    }
-  }
+//  public void summStatJson(JsonFactory.StatsType type, String statsJsonString) throws JSONException {
+//    JSONObject json = new JSONObject(statsJsonString);
+//    switch (type) {
+//      case TOTAL_COUNT:
+//        Long count = totalCountMap
+//            .get(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+//                json.getLong(JsonFactory.FIELD_ID));
+//        if (count == null) {
+//          count = 0L;
+//        }
+//        totalCountMap
+//            .put(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+//                json.getLong(JsonFactory.FIELD_ID), count + json.getLong(JsonFactory.COUNT));
+//        break;
+//      case ERROR_COUNT:
+//        Long count1 = errorCountMap
+//            .get(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+//                getCombinedKey(json.getLong(JsonFactory.FIELD_ID), json.getLong(JsonFactory.CATEGORY_ENUM_ID)));
+//        if (count1 == null) {
+//          count1 = 0L;
+//        }
+//        errorCountMap
+//            .put(getCombinedKey(json.getLong(JsonFactory.JOB_ID), json.getLong(JsonFactory.IRC_ID)),
+//                getCombinedKey(json.getLong(JsonFactory.FIELD_ID), json.getLong(JsonFactory.CATEGORY_ENUM_ID)), count1 + json.getLong(JsonFactory.COUNT));
+//        break;
+//      default:
+//        break;
+//    }
+//  }
 
   public void clear() {
     totalCountMap.clear();
@@ -131,21 +120,21 @@ public class StatsSummer {
     errorCountMap.clear();
   }
 
-  public long getTotalCount(long jobId, long ircId, long fieldId) {
-    Long count = totalCountMap.get(getCombinedKey(jobId, ircId), fieldId);
-    return count == null ? 0 : count;
-  }
-
-  public long getErrorCount(long jobId, long ircId, long fieldId) {
-    Map<String, Long> subMap = errorCountMap.get(getCombinedKey(jobId, ircId));
-
-    long count = 0;
-    for (String combinedKey : subMap.keySet()) {
-      TwoKeyTuple<Long, Long> key2 = separateTwoKeys(combinedKey);
-      if (key2.getK1() == fieldId) {
-        count += subMap.get(combinedKey);
-      }
-    }
-    return count;
-  }
+//  public long getTotalCount(long jobId, long ircId, long fieldId) {
+//    Long count = totalCountMap.get(getCombinedKey(jobId, ircId), fieldId);
+//    return count == null ? 0 : count;
+//  }
+//
+//  public long getErrorCount(long jobId, long ircId, long fieldId) {
+//    Map<String, Long> subMap = errorCountMap.get(getCombinedKey(jobId, ircId));
+//
+//    long count = 0;
+//    for (String combinedKey : subMap.keySet()) {
+//      TwoKeyTuple<Long, Long> key2 = separateTwoKeys(combinedKey);
+//      if (key2.getK1() == fieldId) {
+//        count += subMap.get(combinedKey);
+//      }
+//    }
+//    return count;
+//  }
 }
