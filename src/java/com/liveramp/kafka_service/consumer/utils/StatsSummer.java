@@ -40,9 +40,6 @@ public class StatsSummer {
     valueMap.put(key1, key2, valueMap.get(key1, key2) + value);
     uniqueClickCountMap.get(key1, key2).offer(clickUid.getBytes());
 
-    // count across all fields for job and irc.
-    totalCountMap.put(key1, -1L, totalCountMap.containsKey(key1, -1L) ? totalCountMap.get(key1, -1L) + 1 : 1L);
-
     if (json.has("status")) {
       try {
         int categoryEnumId = json.getInt("category_enum_id");
