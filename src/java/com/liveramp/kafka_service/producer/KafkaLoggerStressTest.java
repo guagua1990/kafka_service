@@ -15,6 +15,7 @@ import com.liveramp.kafka_service.server.KafkaTopicHelper;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClientBuilder;
 import com.rapleaf.spruce_lib.log.EntryLogger;
+import com.rapleaf.spruce_lib.log.SpruceLogEntry;
 
 public class KafkaLoggerStressTest {
 
@@ -31,8 +32,13 @@ public class KafkaLoggerStressTest {
     @Override
     public Void call() throws Exception {
       System.out.println("writing " + n + " logs...");
-      for (AttributionLogGenerator.AttributionLogBuilder log : AttributionLogGenerator.buildNLogs(n)) {
-        logger.writeLogEntry(log);
+      for (final String log : AttributionLogGenerator.buildNLogs(n)) {
+        logger.writeLogEntry(new SpruceLogEntry("total_requests_per_chunk") {
+          @Override
+          public String toString() {
+            return log;
+          }
+        });
       }
       return null;
     }
@@ -55,8 +61,8 @@ public class KafkaLoggerStressTest {
 
     ExecutorService service = Executors.newFixedThreadPool(8);
 
-    for (int i = 0; i < 10; i++) {
-      service.submit(new WriteLogs(logger, i));
+    for (int i = 0; i < 1000; i++) {
+      service.submit(new WriteLogs(logger, 10));
     }
 
     service.shutdown();

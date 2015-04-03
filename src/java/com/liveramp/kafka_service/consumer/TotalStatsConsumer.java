@@ -13,19 +13,17 @@ import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.jvyaml.YAML;
 
-import com.liveramp.kafka_service.consumer.utils.JsonFactory;
-import com.liveramp.kafka_service.consumer.utils.StatsSummer;
 import com.liveramp.kafka_service.db_models.DatabasesImpl;
+import com.liveramp.kafka_service.db_models.db.IKafkaService;
 import com.liveramp.kafka_service.db_models.db.iface.IJobStatPersistence;
 import com.liveramp.kafka_service.db_models.db.models.JobStat;
 
 public class TotalStatsConsumer extends Thread {
 
   private final IJobStatPersistence jobStatPersist;
+  private final IKafkaService db;
   private final ConsumerConnector consumerConnector;
 
   public static void main(String[] args) throws FileNotFoundException {
@@ -34,7 +32,10 @@ public class TotalStatsConsumer extends Thread {
   }
 
   public TotalStatsConsumer() throws FileNotFoundException {
-    jobStatPersist = new DatabasesImpl().getKafkaService().jobStats();
+    db = new DatabasesImpl().getKafkaService();
+    db.disableCaching();
+    jobStatPersist = db.jobStats();
+    jobStatPersist.disableCaching();
     consumerConnector = getConsumerConnector();
   }
 
@@ -60,22 +61,36 @@ public class TotalStatsConsumer extends Thread {
   }
 
   private void updateDb(long jobId, long chunkId, long requestNum) throws Exception {
+    db.setAutoCommit(false);
+
     Set<JobStat> jobStats = jobStatPersist.query()
         .jobId(jobId)
         .find();
 
     long timestamp = System.currentTimeMillis();
 
+    long expectedTotalCount = 0L;
     if (jobStats.isEmpty()) {
+      expectedTotalCount = requestNum;
       jobStatPersist.create(jobId, 0L, 0L, requestNum, timestamp, timestamp);
     } else {
       JobStat jobStat = jobStats.iterator().next();
-      long expectedTotalCount = requestNum + jobStat.getCountExpectedTotal();
+      expectedTotalCount = requestNum + jobStat.getCountExpectedTotal();
 
-      jobStat.setCountExpectedTotal(expectedTotalCount)
+      boolean save = jobStat.setCountExpectedTotal(expectedTotalCount)
           .setUpdatedAt(timestamp)
           .save();
+      if (!save) {
+        System.out.println();
+      }
+      System.out.println(jobStat.getCountExpectedTotal());
     }
+
+    long queryAgain = jobStatPersist.query().jobId(jobId).find().iterator().next().getCountExpectedTotal();
+    System.out.printf("count: %d, total: %d, readBack: %d\n", requestNum, expectedTotalCount, queryAgain);
+
+    db.commit();
+    db.setAutoCommit(true);
   }
 
   private static ConsumerConnector getConsumerConnector() throws FileNotFoundException {

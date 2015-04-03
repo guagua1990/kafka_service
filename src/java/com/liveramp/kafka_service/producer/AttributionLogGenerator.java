@@ -72,21 +72,23 @@ public class AttributionLogGenerator {
     }
   }
 
-  public static List<AttributionLogBuilder> buildNLogs(int n) throws JSONException {
-    List<AttributionLogBuilder> logs = Lists.newArrayList();
+  public static List<String> buildNLogs(int n) throws JSONException {
+//    List<AttributionLogBuilder> logs = Lists.newArrayList();
+    List<String> logs = Lists.newArrayList();
 
     for (int i = 0; i < n; i++) {
       Random random = new Random();
-      logs.add(new AttributionLogBuilder(true)
-              .setAmount(random.nextDouble())
-              .setTimestamp(random.nextLong())
-              .setDeviceId("device" + random.nextLong())
-              .setFieldId(random.nextInt(n))
-              .setJobId(random.nextInt(n))
-              .setIrcId(random.nextInt(n))
-              .setCategoryEnumId(random.nextInt(n))
-              .setStatus("status" + random.nextInt(n))
-      );
+//      logs.add(new AttributionLogBuilder(true)
+//              .setAmount(random.nextDouble())
+//              .setTimestamp(random.nextLong())
+//              .setDeviceId("device" + random.nextLong())
+//              .setFieldId(random.nextInt(n))
+//              .setJobId(random.nextInt(n))
+//              .setIrcId(random.nextInt(n))
+//              .setCategoryEnumId(random.nextInt(n))
+//              .setStatus("status" + random.nextInt(n))
+//      );
+      logs.add(String.format("%s,%s,%s", 77777,888,10));
     }
     return logs;
   }

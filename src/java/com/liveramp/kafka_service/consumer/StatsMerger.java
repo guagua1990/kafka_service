@@ -19,11 +19,13 @@ import org.jvyaml.YAML;
 
 import com.liveramp.kafka_service.consumer.utils.JsonFactory;
 import com.liveramp.kafka_service.db_models.DatabasesImpl;
+import com.liveramp.kafka_service.db_models.db.IKafkaService;
 import com.liveramp.kafka_service.db_models.db.iface.IJobStatPersistence;
 import com.liveramp.kafka_service.db_models.db.models.JobStat;
 
 public class StatsMerger extends Thread {
 
+  private final IKafkaService db;
   private final IJobStatPersistence jobStatPersist;
   private final ConsumerConnector consumerConnector;
 
@@ -33,7 +35,9 @@ public class StatsMerger extends Thread {
   }
 
   public StatsMerger() throws FileNotFoundException {
-    jobStatPersist = new DatabasesImpl().getKafkaService().jobStats();
+    db = new DatabasesImpl().getKafkaService();
+    db.disableCaching();
+    jobStatPersist = db.jobStats();
     consumerConnector = getConsumerConnector();
   }
 
@@ -57,6 +61,7 @@ public class StatsMerger extends Thread {
   }
 
   private void updateDb(JsonFactory.StatsType statsType, String statJsonString) throws Exception {
+    db.setAutoCommit(false);
     if (statsType != JsonFactory.StatsType.TOTAL_COUNT && statsType != JsonFactory.StatsType.ERROR_COUNT) {
       return;
     }
@@ -90,6 +95,8 @@ public class StatsMerger extends Thread {
 
       jobStat.setUpdatedAt(timestamp).save();
     }
+    db.commit();
+    db.setAutoCommit(true);
   }
 
   private JobStat getOneOrThrowException(Set<JobStat> jobStats) {
