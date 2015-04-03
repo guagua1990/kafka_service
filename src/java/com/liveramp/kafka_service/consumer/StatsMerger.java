@@ -18,9 +18,12 @@ import org.jvyaml.YAML;
 
 import com.liveramp.kafka_service.consumer.utils.JsonFactory;
 import com.liveramp.kafka_service.consumer.utils.StatsSummer;
+import com.liveramp.kafka_service.db_models.DatabasesImpl;
+import com.liveramp.kafka_service.db_models.db.iface.IJobStatPersistence;
 
 public class StatsMerger extends Thread {
 
+  private final IJobStatPersistence jobStatPersist;
   private final ConsumerConnector consumerConnector;
   private final StatsSummer statsSummer;
 
@@ -30,6 +33,7 @@ public class StatsMerger extends Thread {
   }
 
   public StatsMerger() throws FileNotFoundException {
+    jobStatPersist = new DatabasesImpl().getKafkaService().jobStats();
     consumerConnector = getConsumerConnector();
     statsSummer = new StatsSummer();
   }
@@ -59,8 +63,11 @@ public class StatsMerger extends Thread {
     long ircId = object.getLong(JsonFactory.IRC_ID);
     long fieldId = object.getLong(JsonFactory.FIELD_ID);
     long totalCount = statsSummer.getTotalCount(jobId, ircId, fieldId);
-    long errorCount = statsSummer.getErrorCount(jobId, ircId, fieldId, 0L);
+    long errorCount = statsSummer.getErrorCount(jobId, ircId, fieldId);
 
+    jobStatPersist.query()
+        .jobId(jobId)
+        .ircId(ircId);
 
   }
 
