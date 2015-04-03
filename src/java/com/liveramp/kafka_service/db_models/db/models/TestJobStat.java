@@ -15,8 +15,6 @@ public class TestJobStat {
 
   @Test
   public void testJobStatCreation() throws Exception {
-    long timestamp = System.currentTimeMillis();
-    jobStats.create(2344L, 4L, 10L, 12L, timestamp, timestamp);
-    jobStats.create(2356L, 5L, 12L, 12L, timestamp, timestamp);
+    jobStats.createDefaultInstance();
   }
 }

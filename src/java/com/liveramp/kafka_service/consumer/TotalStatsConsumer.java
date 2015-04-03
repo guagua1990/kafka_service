@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
@@ -20,6 +21,7 @@ import com.liveramp.kafka_service.consumer.utils.JsonFactory;
 import com.liveramp.kafka_service.consumer.utils.StatsSummer;
 import com.liveramp.kafka_service.db_models.DatabasesImpl;
 import com.liveramp.kafka_service.db_models.db.iface.IJobStatPersistence;
+import com.liveramp.kafka_service.db_models.db.models.JobStat;
 
 public class TotalStatsConsumer extends Thread {
 
@@ -48,14 +50,31 @@ public class TotalStatsConsumer extends Thread {
         long jobId = Long.parseLong(params[0]);
         long chunkId = Long.parseLong(params[1]);
         long requestsNum = Long.parseLong(params[2]);
+
+        updateDb(jobId, chunkId, requestsNum);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void updateDb(long jobId, long chunkId, long requestNum) throws JSONException {
-    // TODO
+  private void updateDb(long jobId, long chunkId, long requestNum) throws Exception {
+    Set<JobStat> jobStats = jobStatPersist.query()
+        .jobId(jobId)
+        .find();
+
+    long timestamp = System.currentTimeMillis();
+
+    if (jobStats.isEmpty()) {
+      jobStatPersist.create(jobId, 0L, 0L, requestNum, timestamp, timestamp);
+    } else {
+      JobStat jobStat = jobStats.iterator().next();
+      long expectedTotalCount = requestNum + jobStat.getCountExpectedTotal();
+
+      jobStat.setCountExpectedTotal(expectedTotalCount)
+          .setUpdatedAt(timestamp)
+          .save();
+    }
   }
 
   private static ConsumerConnector getConsumerConnector() throws FileNotFoundException {
