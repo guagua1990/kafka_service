@@ -1,61 +1,240 @@
 package com.liveramp.kafka_service.zookeeper;
 
-import java.io.FileReader;
-import java.util.Map;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-import clojure.lang.Obj;
+import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 import org.apache.zookeeper.server.quorum.QuorumPeerMain;
-import org.jvyaml.YAML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liveramp.java_support.alerts_handler.AlertsHandler;
-import com.liveramp.java_support.alerts_handler.AlertsHandlers;
+import com.liveramp.java_support.alerts_handler.InMemoryAlertsHandler;
 import com.liveramp.java_support.alerts_handler.recipients.AlertRecipients;
 import com.liveramp.java_support.logging.LoggingHelper;
-import com.liveramp.kafka_service.server.KafkaBroker;
+import com.rapleaf.support.thread.NamedThreadFactory;
 
 public class ZookeeperServer {
   private static final Logger LOG = LoggerFactory.getLogger(ZookeeperServer.class);
 
-  private Properties properties;
+  private static final String DEFAULT_WORKING_DIR = "/tmp/zookeeper";
+  private static final String DATA_DIR = "/data";
+  private static final String LOG_DIR = "/log";
 
-  ZookeeperServer(Properties properties) {
-    this.properties = properties;
+  private ZookeeperServer() {
+    throw new AssertionError("Should not instantiate a zookeeper server");
   }
 
-  public void start() throws Exception {
-    final QuorumPeerConfig quorumPeerConfig = new QuorumPeerConfig();
-    quorumPeerConfig.parseProperties(properties);
-
-    final QuorumPeerMain quorumPeerMain = new QuorumPeerMain();
-    quorumPeerMain.runFromConfig(quorumPeerConfig);
+  public static Set<ExecutorService> startProductionZk(int id) throws IOException {
+    return Collections.singleton(startFromEnsembles(id, DEFAULT_WORKING_DIR, ZKEnv.PRODUCTION_ZKS));
   }
 
-  public static void main(String[] args) throws Exception {
-    LoggingHelper.setLoggingProperties("zookeeper");
-    AlertsHandler alertHandler = AlertsHandlers.distribution(KafkaBroker.class);
+  public static Set<ExecutorService> startTestZks() throws IOException {
+    Set<ExecutorService> services = Sets.newHashSet();
+    for (ZKEnv.ZKEnsembles ensembles : ZKEnv.TEST_ZKS) {
+      int id = ensembles.getId();
+      services.add(startFromEnsembles(id, DEFAULT_WORKING_DIR + "/zk" + id, ZKEnv.TEST_ZKS));
+    }
+    return services;
+  }
 
-    Map map = (Map)YAML.load(new FileReader("config/zookeeper-server.yaml"));
-    final ZookeeperServerBuilder serverBuilder = ZookeeperServerBuilder.create()
-        .setClientPort(((Number)map.get("clientPort")).intValue())
-        .setDataDir((String)map.get("dataDir"))
-        .setDataLogDir((String)map.get("dataLogDir"));
-
-    for (Object entry : map.entrySet()) {
-      String key = (String)((Map.Entry)entry).getKey();
-      if (key.contains("server")) {
-        serverBuilder.addServer(key, (String)((Map.Entry)entry).getValue());
+  public static ExecutorService startFromEnsembles(int id, String workingDir, EnumSet<ZKEnv.ZKEnsembles> ensembles) throws IOException {
+    if (!verifyWorkingDir(id, workingDir)) {
+      LOG.info("clear current working directory {} and set up new one for zookeeper {}", workingDir, id);
+      File file = new File(workingDir);
+      if (!file.exists() || (file.exists() && file.delete())) {
+        setupNewWorkingDir(id, workingDir);
+      } else {
+        throw new IllegalArgumentException("Fail to create new working directory " + workingDir + " for server " + id);
       }
     }
 
+    final Builder serverBuilder = new Builder(workingDir);
+    for (ZKEnv.ZKEnsembles server : ensembles) {
+      serverBuilder.addServer(server.getId(), server.getHostPorts());
+    }
+    System.out.println("starting zookeeper " + id + " in " + workingDir);
+    return serverBuilder.start();
+  }
+
+  public static ExecutorService startFromProperties(String propertiesPath) throws IOException {
+    Properties prop = new Properties();
+    InputStream in = null;
     try {
-      serverBuilder.build().start();
+      in = new FileInputStream(propertiesPath);
+      prop.load(in);
+      return new Builder(prop).start();
+    } catch (FileNotFoundException e) {
+      LOG.error("The properties file {} doesn't exist", propertiesPath);
+      if (in != null) {
+        in.close();
+      }
+    }
+    return null;
+  }
+
+  private static boolean verifyWorkingDir(int id, String workingDir) throws IOException {
+    if (!isValidDir(workingDir)) {
+      return false;
+    }
+    if (!isValidDir(workingDir + DATA_DIR)) {
+      return false;
+    }
+    if (!isValidDir(workingDir + LOG_DIR)) {
+      return false;
+    }
+    File myid = new File(workingDir + DATA_DIR + "/myid");
+    return !(!myid.exists() || !myid.isFile()) && Files.readFirstLine(myid, Charset.forName("UTF-8")).equals(String.valueOf(id));
+  }
+
+  private static void setupNewWorkingDir(int id, String workingDir) throws IOException {
+    makeDir(workingDir);
+    makeDir(workingDir + LOG_DIR);
+    File dataDir = makeDir(workingDir + DATA_DIR);
+
+    File idFd = new File(dataDir, "myid");
+    FileWriter fileWriter = new FileWriter(idFd);
+    fileWriter.write(String.valueOf(id));
+    fileWriter.close();
+  }
+
+  private static boolean isValidDir(String path) {
+    File workDir = new File(path);
+    return workDir.exists() && workDir.isDirectory();
+  }
+
+  private static File makeDir(String path) throws IOException {
+    File file = new File(path);
+    if (!file.mkdirs()) {
+      throw new IOException("fail to mkdir " + path);
+    }
+    return file;
+  }
+
+  public static void main(String[] args) {
+    LoggingHelper.setLoggingProperties("zookeeper");
+    AlertsHandler alertHandler = new InMemoryAlertsHandler();
+    String option = args[0];
+
+    Set<ExecutorService> services = Sets.newHashSet();
+    try {
+      if (option.equals("PRODUCTION")) {
+        services = startProductionZk(Integer.valueOf(args[1]));
+      } else if (option.equals("TEST")) {
+        services = startTestZks();
+      } else {
+        throw new IllegalArgumentException("No " + option + " available");
+      }
     } catch (Exception e) {
-      alertHandler.sendAlert("Exception in ZooKeeper", e,
-          AlertRecipients.of("yjin@liveramp.com"), AlertRecipients.of("ltu@liveramp.com"), AlertRecipients.of("syan@liveramp.com"));
+      alertHandler.sendAlert("fail to start server", e, AlertRecipients.of("yjin@liveramp.com"));
+    } finally {
+      Runtime.getRuntime().addShutdownHook(new ShutdownHook(services));
+    }
+  }
+
+  public static class Builder {
+    private final Properties properties;
+
+    public Builder(String workingDir) {
+      this.properties = new Properties();
+      setWorkingDir(workingDir);
+      setClientPort(ZKEnv.CLIENT_DEFAULT_PORT);
+      setInitLimit(ZKEnv.INIT_LIMIT);
+      setSyncLimit(ZKEnv.SYNC_LIMIT);
+    }
+
+    public Builder(Properties properties) {
+      this.properties = properties;
+    }
+
+    public Builder setClientPort(int clientPort) {
+      return setProperty("clientPort", clientPort);
+    }
+
+    public Builder setWorkingDir(String workingDir) {
+      setProperty("dataDir", workingDir + DATA_DIR);
+      setProperty("dataLogDir", workingDir + LOG_DIR);
+      return this;
+    }
+
+    public Builder setInitLimit(int initLimit) {
+      return setProperty("initLimit", initLimit);
+    }
+
+    public Builder setSyncLimit(int syncLimit) {
+      return setProperty("syncLimit", syncLimit);
+    }
+
+    public Builder addServer(int id, String address) {
+      return setProperty(String.format("server.%d", id), address);
+    }
+
+    private Builder setProperty(String key, String value) {
+      this.properties.setProperty(key, value);
+      return this;
+    }
+
+    private Builder setProperty(String key, int value) {
+      this.properties.setProperty(key, String.valueOf(value));
+      return this;
+    }
+
+    public ExecutorService start() {
+      ExecutorService service = Executors.newSingleThreadExecutor(new NamedThreadFactory("ZookeeperServer"));
+      service.submit(new ZkServerRunner(properties));
+      return service;
+    }
+  }
+
+  private static class ZkServerRunner implements Callable<Void> {
+    private final Properties properties;
+
+    private ZkServerRunner(Properties properties) {
+      this.properties = properties;
+    }
+
+    @Override
+    public Void call() throws Exception {
+      final QuorumPeerConfig quorumPeerConfig = new QuorumPeerConfig();
+      quorumPeerConfig.parseProperties(properties);
+      final QuorumPeerMain quorumPeerMain = new QuorumPeerMain();
+      quorumPeerMain.runFromConfig(quorumPeerConfig);
+      return null;
+    }
+  }
+
+  private static class ShutdownHook extends Thread {
+    private final Set<ExecutorService> runningServices;
+
+    private ShutdownHook(Set<ExecutorService> runningServices) {
+      this.runningServices = runningServices;
+    }
+
+    @Override
+    public void run() {
+      for (ExecutorService service : runningServices) {
+        service.shutdown();
+        try {
+          service.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+          LOG.error("shut down service interrupted");
+        }
+      }
     }
   }
 }
