@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
+import org.apache.commons.io.FileUtils;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 import org.apache.zookeeper.server.quorum.QuorumPeerMain;
 import org.slf4j.Logger;
@@ -41,30 +42,53 @@ public class ZookeeperServer {
   }
 
   public static Set<ExecutorService> startProductionZk(int id) throws IOException {
-    return Collections.singleton(startFromEnsembles(id, DEFAULT_WORKING_DIR, ZKEnv.PRODUCTION_ZKS));
+    ZKEnv.ZKEnsembles server = null;
+    switch (id) {
+      case 0:
+        server = ZKEnv.ZKEnsembles.SERVER_0;
+        break;
+      case 1:
+        server = ZKEnv.ZKEnsembles.SERVER_1;
+        break;
+      case 2:
+        server = ZKEnv.ZKEnsembles.SERVER_2;
+        break;
+      case 3:
+        server = ZKEnv.ZKEnsembles.SERVER_3;
+        break;
+      case 4:
+        server = ZKEnv.ZKEnsembles.SERVER_4;
+        break;
+      default:
+        throw new IllegalArgumentException("invalid zookeeper id " + id);
+    }
+    return Collections.singleton(startFromEnsembles(server, DEFAULT_WORKING_DIR, ZKEnv.PRODUCTION_ZKS));
+
   }
 
   public static Set<ExecutorService> startTestZks() throws IOException {
     Set<ExecutorService> services = Sets.newHashSet();
-    for (ZKEnv.ZKEnsembles ensembles : ZKEnv.TEST_ZKS) {
-      int id = ensembles.getId();
-      services.add(startFromEnsembles(id, DEFAULT_WORKING_DIR + "/zk" + id, ZKEnv.TEST_ZKS));
+    for (ZKEnv.ZKEnsembles sever : ZKEnv.TEST_ZKS) {
+      services.add(startFromEnsembles(sever, DEFAULT_WORKING_DIR + "/zk" + sever.getId(), ZKEnv.TEST_ZKS));
     }
     return services;
   }
 
-  public static ExecutorService startFromEnsembles(int id, String workingDir, EnumSet<ZKEnv.ZKEnsembles> ensembles) throws IOException {
+  public static ExecutorService startFromEnsembles(ZKEnv.ZKEnsembles zookeeper, String workingDir, EnumSet<ZKEnv.ZKEnsembles> ensembles) throws IOException {
+    if (!ensembles.contains(zookeeper)) {
+      throw new IllegalArgumentException("This ensemble " + zookeeper + " doesn't belong to the working set " + ensembles);
+    }
+    int id = zookeeper.getId();
     if (!verifyWorkingDir(id, workingDir)) {
       LOG.info("clear current working directory {} and set up new one for zookeeper {}", workingDir, id);
       File file = new File(workingDir);
-      if (!file.exists() || (file.exists() && file.delete())) {
-        setupNewWorkingDir(id, workingDir);
-      } else {
-        throw new IllegalArgumentException("Fail to create new working directory " + workingDir + " for server " + id);
+      if (file.exists()) {
+        FileUtils.deleteDirectory(file);
       }
+      setupNewWorkingDir(id, workingDir);
     }
 
-    final Builder serverBuilder = new Builder(workingDir);
+    final Builder serverBuilder = new Builder(zookeeper.getClientPort(), workingDir);
     for (ZKEnv.ZKEnsembles server : ensembles) {
       serverBuilder.addServer(server.getId(), server.getHostPorts());
     }
@@ -126,34 +150,13 @@ public class ZookeeperServer {
     return file;
   }
 
-  public static void main(String[] args) {
-    LoggingHelper.setLoggingProperties("zookeeper");
-    AlertsHandler alertHandler = new InMemoryAlertsHandler();
-    String option = args[0];
-
-    Set<ExecutorService> services = Sets.newHashSet();
-    try {
-      if (option.equals("PRODUCTION")) {
-        services = startProductionZk(Integer.valueOf(args[1]));
-      } else if (option.equals("TEST")) {
-        services = startTestZks();
-      } else {
-        throw new IllegalArgumentException("No " + option + " available");
-      }
-    } catch (Exception e) {
-      alertHandler.sendAlert("fail to start server", e, AlertRecipients.of("yjin@liveramp.com"));
-    } finally {
-      Runtime.getRuntime().addShutdownHook(new ShutdownHook(services));
-    }
-  }
-
   public static class Builder {
     private final Properties properties;
 
-    public Builder(String workingDir) {
+    public Builder(int clientPort, String workingDir) {
       this.properties = new Properties();
       setWorkingDir(workingDir);
-      setClientPort(ZKEnv.CLIENT_DEFAULT_PORT);
+      setClientPort(clientPort);
       setInitLimit(ZKEnv.INIT_LIMIT);
       setSyncLimit(ZKEnv.SYNC_LIMIT);
     }
@@ -162,11 +165,11 @@ public class ZookeeperServer {
       this.properties = properties;
     }
 
-    public Builder setClientPort(int clientPort) {
+    private Builder setClientPort(int clientPort) {
       return setProperty("clientPort", clientPort);
     }
 
-    public Builder setWorkingDir(String workingDir) {
+    private Builder setWorkingDir(String workingDir) {
       setProperty("dataDir", workingDir + DATA_DIR);
       setProperty("dataLogDir", workingDir + LOG_DIR);
       return this;
@@ -235,6 +238,27 @@ public class ZookeeperServer {
           LOG.error("shut down service interrupted");
         }
       }
+    }
+  }
+
+  public static void main(String[] args) {
+    LoggingHelper.setLoggingProperties("zookeeper");
+    AlertsHandler alertHandler = new InMemoryAlertsHandler();
+    String option = args[0];
+
+    Set<ExecutorService> services = Sets.newHashSet();
+    try {
+      if (option.equals("PRODUCTION")) {
+        services = startProductionZk(Integer.valueOf(args[1]));
+      } else if (option.equals("TEST")) {
+        services = startTestZks();
+      } else {
+        throw new IllegalArgumentException("No " + option + " available");
+      }
+    } catch (Exception e) {
+      alertHandler.sendAlert("fail to start server", e, AlertRecipients.of("yjin@liveramp.com"));
+    } finally {
+      Runtime.getRuntime().addShutdownHook(new ShutdownHook(services));
     }
   }
 }
