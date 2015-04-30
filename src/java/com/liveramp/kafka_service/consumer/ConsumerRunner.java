@@ -1,8 +1,6 @@
 package com.liveramp.kafka_service.consumer;
 
 import java.io.FileNotFoundException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import com.liveramp.kafka_service.consumer.channels.ChannelHub;
 import com.liveramp.kafka_service.consumer.channels.LogSource;
