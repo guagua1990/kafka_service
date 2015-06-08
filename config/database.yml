@@ -1,8 +1,0 @@
-log_stats:
-  adapter: mysql
-  database: log_stats_development
-  username: root
-  password:
-  host: 127.0.0.1
-  pool: 5
-  timeout: 5000
