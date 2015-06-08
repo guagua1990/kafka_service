@@ -30,15 +30,15 @@ import com.liveramp.java_support.alerts_handler.recipients.AlertRecipients;
 import com.liveramp.java_support.logging.LoggingHelper;
 import com.rapleaf.support.thread.NamedThreadFactory;
 
-public class ZookeeperServer {
-  private static final Logger LOG = LoggerFactory.getLogger(ZookeeperServer.class);
+public class ZookeeperServers {
+  private static final Logger LOG = LoggerFactory.getLogger(ZookeeperServers.class);
 
   private static final String DEFAULT_WORKING_DIR = "/tmp/zookeeper";
   private static final String DATA_DIR = "/data";
   private static final String LOG_DIR = "/log";
 
-  private ZookeeperServer() {
-    throw new AssertionError("Should not instantiate a zookeeper server");
+  private ZookeeperServers() {
+    throw new AssertionError("Should not instantiate zookeeper servers");
   }
 
   public static Set<ExecutorService> startProductionZk(int id) throws IOException {
@@ -198,7 +198,7 @@ public class ZookeeperServer {
     }
 
     public ExecutorService start() {
-      ExecutorService service = Executors.newSingleThreadExecutor(new NamedThreadFactory("ZookeeperServer"));
+      ExecutorService service = Executors.newSingleThreadExecutor(new NamedThreadFactory("ZookeeperServers"));
       service.submit(new ZkServerRunner(properties));
       return service;
     }

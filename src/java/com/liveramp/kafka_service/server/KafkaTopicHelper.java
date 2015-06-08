@@ -15,7 +15,6 @@ import scala.Tuple2;
 import scala.collection.Iterator;
 
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
-import com.liveramp.kafka_service.zookeeper.ZookeeperClientBuilder;
 
 public class KafkaTopicHelper {
   private static final Logger LOG = LoggerFactory.getLogger(KafkaTopicHelper.class);

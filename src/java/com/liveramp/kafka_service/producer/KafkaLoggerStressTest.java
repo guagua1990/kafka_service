@@ -13,7 +13,6 @@ import org.jvyaml.YAML;
 import com.liveramp.kafka_service.producer.config.YamlProducerConfigBuilder;
 import com.liveramp.kafka_service.server.KafkaTopicHelper;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
-import com.liveramp.kafka_service.zookeeper.ZookeeperClientBuilder;
 import com.rapleaf.spruce_lib.log.EntryLogger;
 import com.rapleaf.spruce_lib.log.SpruceLogEntry;
 
