@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import com.liveramp.kafka_service.producer.config.YamlProducerConfigBuilder;
-import com.liveramp.kafka_service.server.KafkaTopicHelper;
+import com.liveramp.kafka_service.broker.KafkaTopicHelper;
 import com.liveramp.kafka_service.zookeeper.ZKEnv;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
 import com.rapleaf.spruce_lib.log.EntryLogger;

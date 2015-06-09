@@ -1,10 +1,7 @@
 package com.liveramp.kafka_service.zookeeper;
 
 import java.util.EnumSet;
-import java.util.List;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import kafka.utils.ZKStringSerializer$;
 import org.I0Itec.zkclient.ZkClient;
 import org.slf4j.Logger;
@@ -40,11 +37,7 @@ public class ZookeeperClient {
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT_MILLIS;
 
     public Builder(EnumSet<ZKEnv.ZKEnsembles> zkEnsembleses) {
-      List<String> conns = Lists.newArrayList();
-      for (ZKEnv.ZKEnsembles ensembles : zkEnsembleses) {
-        conns.add(ensembles.getHostClientPort());
-      }
-      this.connections = Joiner.on(",").join(conns);
+      this(ZKEnv.getZkClientConnections(zkEnsembleses));
     }
 
     public Builder(String connections) {
@@ -62,7 +55,6 @@ public class ZookeeperClient {
     }
 
     public ZookeeperClient build() {
-      System.out.println(connections);
       return new ZookeeperClient(connections, sessionTimeout, connectionTimeout);
     }
   }

@@ -1,8 +1,10 @@
 package com.liveramp.kafka_service.zookeeper;
 
 import java.util.EnumSet;
+import java.util.List;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 
 public class ZKEnv {
 
@@ -22,6 +24,14 @@ public class ZKEnv {
 
   // Test environments
   public static EnumSet<ZKEnsembles> TEST_ZKS = EnumSet.of(ZKEnsembles.TEST_SERVER_1, ZKEnsembles.TEST_SERVER_2, ZKEnsembles.TEST_SERVER_3);
+
+  public static String getZkClientConnections(EnumSet<ZKEnsembles> zks) {
+    List<String> conns = Lists.newArrayList();
+    for (ZKEnv.ZKEnsembles ensembles : zks) {
+      conns.add(ensembles.getHostClientPort());
+    }
+    return Joiner.on(",").join(conns);
+  }
 
   public enum ZKEnsembles {
     //Production Zookeeper servers

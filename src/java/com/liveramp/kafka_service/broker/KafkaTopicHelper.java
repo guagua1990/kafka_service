@@ -1,4 +1,4 @@
-package com.liveramp.kafka_service.server;
+package com.liveramp.kafka_service.broker;
 
 import java.util.Properties;
 import java.util.Set;
@@ -24,12 +24,8 @@ public class KafkaTopicHelper {
 
   private ZookeeperClient zookeeperClient;
 
-  private KafkaTopicHelper(ZookeeperClient zookeeperClient) {
+  public KafkaTopicHelper(ZookeeperClient zookeeperClient) {
     this.zookeeperClient = zookeeperClient;
-  }
-
-  public static KafkaTopicHelper create(ZookeeperClient zookeeperClient) {
-    return new KafkaTopicHelper(zookeeperClient);
   }
 
   public void createTopic(String topic) {
@@ -60,6 +56,10 @@ public class KafkaTopicHelper {
     }
   }
 
+  public String getDescriptions(String topic) {
+    return null;
+  }
+
   public Set<String> getTopics() {
     Set<String> topics = Sets.newHashSet();
     Iterator<Tuple2<String, Properties>> it = AdminUtils.fetchAllTopicConfigs(zookeeperClient.get()).iterator();
@@ -71,9 +71,8 @@ public class KafkaTopicHelper {
 
   public static void main(String[] args) {
     ZookeeperClient zookeeperClient = new ZookeeperClient.Builder(ZKEnv.TEST_ZKS).build();
-    KafkaTopicHelper topicHelper = KafkaTopicHelper.create(zookeeperClient);
-    System.out.println(Joiner.on(", ").join(topicHelper.getTopics()));
-    topicHelper.deleteTopic("stats_merge");
+    KafkaTopicHelper topicHelper = new KafkaTopicHelper(zookeeperClient);
+    topicHelper.createTopic("testing-2");
     System.out.println(Joiner.on(", ").join(topicHelper.getTopics()));
   }
 }

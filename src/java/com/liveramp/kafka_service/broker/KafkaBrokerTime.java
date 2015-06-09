@@ -1,4 +1,4 @@
-package com.liveramp.kafka_service.server;
+package com.liveramp.kafka_service.broker;
 
 import kafka.utils.Time;
 
