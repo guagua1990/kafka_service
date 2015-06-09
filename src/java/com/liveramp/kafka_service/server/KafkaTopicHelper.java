@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 import scala.collection.Iterator;
 
+import com.liveramp.kafka_service.zookeeper.ZKEnv;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
 
 public class KafkaTopicHelper {
@@ -69,9 +70,7 @@ public class KafkaTopicHelper {
   }
 
   public static void main(String[] args) {
-    ZookeeperClient zookeeperClient = ZookeeperClientBuilder
-        .from("10.99.32.1:2181,10.99.32.14:2181,10.99.32.36:2181")
-        .build();
+    ZookeeperClient zookeeperClient = new ZookeeperClient.Builder(ZKEnv.TEST_ZKS).build();
     KafkaTopicHelper topicHelper = KafkaTopicHelper.create(zookeeperClient);
     System.out.println(Joiner.on(", ").join(topicHelper.getTopics()));
     topicHelper.deleteTopic("stats_merge");

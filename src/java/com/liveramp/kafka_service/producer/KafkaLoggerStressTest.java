@@ -1,17 +1,14 @@
 package com.liveramp.kafka_service.producer;
 
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.jvyaml.YAML;
-
 import com.liveramp.kafka_service.producer.config.YamlProducerConfigBuilder;
 import com.liveramp.kafka_service.server.KafkaTopicHelper;
+import com.liveramp.kafka_service.zookeeper.ZKEnv;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
 import com.rapleaf.spruce_lib.log.EntryLogger;
 import com.rapleaf.spruce_lib.log.SpruceLogEntry;
@@ -44,10 +41,7 @@ public class KafkaLoggerStressTest {
   }
 
   public static void main(String[] args) throws InterruptedException, FileNotFoundException {
-    Map map = (Map)YAML.load(new FileReader("config/zookeeper-client.yaml"));
-    ZookeeperClient zookeeperClient = ZookeeperClientBuilder
-        .from((String)map.get("zookeeper.connect"))
-        .build();
+    ZookeeperClient zookeeperClient = new ZookeeperClient.Builder(ZKEnv.TEST_ZKS).build();
 
     KafkaTopicHelper helper = KafkaTopicHelper.create(zookeeperClient);
     if (!helper.getTopics().contains(AttributionLogGenerator.GOOD_REQUEST_CATEGORY)) {

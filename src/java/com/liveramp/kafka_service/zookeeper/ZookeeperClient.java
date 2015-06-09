@@ -1,17 +1,74 @@
 package com.liveramp.kafka_service.zookeeper;
 
-import java.io.IOException;
+import java.util.EnumSet;
+import java.util.List;
 
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import kafka.utils.ZKStringSerializer$;
+import org.I0Itec.zkclient.ZkClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ZookeeperClient extends ZooKeeper {
+
+public class ZookeeperClient {
   private static final Logger LOG = LoggerFactory.getLogger(ZookeeperClient.class);
+  public static final int DEFAULT_SESSION_TIMEOUT_MILLIS = 10000;
+  public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 10000;
 
+  private final ZkClient zkClient;
 
-  public ZookeeperClient(String connectString, int sessionTimeout, Watcher watcher) throws IOException {
-    super(connectString, sessionTimeout, watcher);
+  private ZookeeperClient(String connections, int sessionTimeout, int connectionTimeout) {
+    this.zkClient = new ZkClient(connections, sessionTimeout, connectionTimeout, ZKStringSerializer$.MODULE$);
+  }
+
+  public ZkClient get() {
+    return zkClient;
+  }
+
+  public boolean createAndPersistNewPath(String path) {
+    if (!zkClient.exists(path)) {
+      zkClient.createPersistent(path);
+      return true;
+    }
+    return false;
+  }
+
+  public static class Builder {
+    private final String connections;
+    private int sessionTimeout = DEFAULT_SESSION_TIMEOUT_MILLIS;
+    private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT_MILLIS;
+
+    public Builder(EnumSet<ZKEnv.ZKEnsembles> zkEnsembleses) {
+      List<String> conns = Lists.newArrayList();
+      for (ZKEnv.ZKEnsembles ensembles : zkEnsembleses) {
+        conns.add(ensembles.getHostClientPort());
+      }
+      this.connections = Joiner.on(",").join(conns);
+    }
+
+    public Builder(String connections) {
+      this.connections = connections;
+    }
+
+    public Builder setSessionTimeout(int sessionTimeout) {
+      this.sessionTimeout = sessionTimeout;
+      return this;
+    }
+
+    public Builder setConnectionTimeout(int connectionTimeout) {
+      this.connectionTimeout = connectionTimeout;
+      return this;
+    }
+
+    public ZookeeperClient build() {
+      System.out.println(connections);
+      return new ZookeeperClient(connections, sessionTimeout, connectionTimeout);
+    }
+  }
+
+  public static void main(String[] args) {
+    ZookeeperClient client = new Builder(ZKEnv.TEST_ZKS).build();
+    System.out.println(ZkFs.prettyPrintTree(ZkFs.readingCurrentFs(client.get(), new ZkFs.Directory("/"))));
   }
 }

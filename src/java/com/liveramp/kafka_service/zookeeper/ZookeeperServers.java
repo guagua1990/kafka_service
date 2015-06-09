@@ -70,6 +70,7 @@ public class ZookeeperServers {
     Set<ExecutorService> services = Sets.newHashSet();
     for (ZKEnv.ZKEnsembles sever : ZKEnv.TEST_ZKS) {
       services.add(startFromEnsembles(sever, DEFAULT_WORKING_DIR + "/zk" + sever.getId(), ZKEnv.TEST_ZKS));
+      System.out.println(String.format("Starting service %d on %s", sever.getId(), sever.getHostClientPort()));
     }
     return services;
   }
@@ -92,7 +93,7 @@ public class ZookeeperServers {
     for (ZKEnv.ZKEnsembles server : ensembles) {
       serverBuilder.addServer(server.getId(), server.getHostPorts());
     }
-    System.out.println("starting zookeeper " + id + " in " + workingDir);
+    LOG.info("starting zookeeper {} in {}", id, workingDir);
     return serverBuilder.start();
   }
 

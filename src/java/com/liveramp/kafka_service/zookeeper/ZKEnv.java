@@ -25,11 +25,11 @@ public class ZKEnv {
 
   public enum ZKEnsembles {
     //Production Zookeeper servers
-    SERVER_0(0, "s2s-data-syner00"),
-    SERVER_1(1, "s2s-data-syner01"),
-    SERVER_2(2, "s2s-data-syner02"),
-    SERVER_3(3, "s2s-data-syner03"),
-    SERVER_4(4, "s2s-data-syner04"),
+    SERVER_0(0, "s2s-data-syncer00"),
+    SERVER_1(1, "s2s-data-syncer01"),
+    SERVER_2(2, "s2s-data-syncer02"),
+    SERVER_3(3, "s2s-data-syncer03"),
+    SERVER_4(4, "s2s-data-syncer04"),
 
     //Local Zookeeper servers
     TEST_SERVER_1(1, "localhost", 2181, 2888, 3888),
@@ -64,6 +64,10 @@ public class ZKEnv {
 
     public int getClientPort() {
       return clientPort;
+    }
+
+    public String getHostClientPort() {
+      return Joiner.on(":").join(host, clientPort);
     }
 
     public String getHostPorts() {
