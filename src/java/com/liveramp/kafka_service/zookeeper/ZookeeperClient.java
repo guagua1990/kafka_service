@@ -78,9 +78,11 @@ public class ZookeeperClient {
 
   public static void main(String[] args) {
     ZookeeperClient client = new Builder(ZKEnv.getZKInstances()).build();
-    client.createMessage("/consumers/new/1", "3");
+    client.deleteNode("/consumers/new/1", true);
+    client.createNode("/consumers/new/1/3");
     System.out.println(ZkFs.prettyPrintTree(ZkFs.readingCurrentFs(client.get(), new ZkFs.Directory("/"))));
-    client.updateMessage("/consumers/new/1", "4");
+    client.deleteNode("/consumers/new/1/3", true);
+    client.createNode("/consumers/new/1/4");
     System.out.println(ZkFs.prettyPrintTree(ZkFs.readingCurrentFs(client.get(), new ZkFs.Directory("/"))));
     client.close();
   }
