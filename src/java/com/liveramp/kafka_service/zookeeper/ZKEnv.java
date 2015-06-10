@@ -13,6 +13,19 @@ public class ZKEnv {
   // the number of ticks that can pass between sending a request and getting an acknowledgement
   public static final int SYNC_LIMIT = 5;
 
+  public static final int MODE = 1; // change it to use different mode for the whole environment
+
+  public static EnumSet<ZKEnsembles> getZKInstances() {
+    switch (MODE) {
+      case 0:
+        return PRODUCTION_ZKS;
+      case 1:
+        return TEST_ZKS;
+      default:
+        return null;
+    }
+  }
+
   // Production environments
   public static EnumSet<ZKEnsembles> PRODUCTION_ZKS = EnumSet.of(
       ZKEnsembles.SERVER_0,

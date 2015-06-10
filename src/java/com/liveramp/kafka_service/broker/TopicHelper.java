@@ -1,5 +1,8 @@
 package com.liveramp.kafka_service.broker;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
@@ -12,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.collection.Iterator;
 
+import com.liveramp.kafka_service.zookeeper.ZKEnv;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
 
 public class TopicHelper {
@@ -61,6 +65,35 @@ public class TopicHelper {
       topics.add(iter.next());
     }
     return topics;
+  }
+
+  public static void main(String[] args) throws IOException {
+    ZookeeperClient client = new ZookeeperClient.Builder(ZKEnv.getZKInstances()).build();
+    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+    System.out.println("please enter the command:");
+    String command = null;
+    while ((command = br.readLine()) != null) {
+      if (command.startsWith("create")) {
+        String topic = command.split(" ")[1];
+        createTopic(client, topic);
+        System.out.println("created topic " + topic);
+      } else if (command.equals("list")) {
+        System.out.println(getAllTopics(client));
+      } else if (command.startsWith("delete")) {
+        String topic = command.split(" ")[1];
+        deleteTopic(client, topic);
+        System.out.println("deleted topic " + topic);
+      } else if (command.startsWith("describe")) {
+        String topic = command.split(" ")[1];
+        System.out.println(getDescription(client, topic));
+      } else if (command.equals("exit")) {
+        break;
+      } else {
+        System.out.println("No such command: " + command);
+      }
+    }
+    client.close();
   }
 
 }

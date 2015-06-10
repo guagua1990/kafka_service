@@ -64,7 +64,7 @@ public class ZookeeperClient {
   }
 
   public static void main(String[] args) {
-    ZookeeperClient client = new Builder(ZKEnv.TEST_ZKS).build();
+    ZookeeperClient client = new Builder(ZKEnv.getZKInstances()).build();
     System.out.println(ZkFs.prettyPrintTree(ZkFs.readingCurrentFs(client.get(), new ZkFs.Directory("/"))));
     client.close();
   }

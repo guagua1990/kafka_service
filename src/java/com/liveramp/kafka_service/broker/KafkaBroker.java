@@ -116,10 +116,10 @@ public class KafkaBroker {
     AlertsHandler alertHandler = AlertsHandlers.distribution(KafkaBroker.class);
     try {
       final KafkaBroker broker = new Builder(brokerId, "localhost")
-          .setZookeeperConnect(ZKEnv.TEST_ZKS)
+          .setZookeeperConnect(ZKEnv.getZKInstances())
           .setPort(DEFAULT_PORT)
           .setDeleteTopicEnable(true)
-          .setLogDirs("/tmp/yjin/kafka-logs")
+          .setLogDirs("/tmp/kafka-logs/" + brokerId)
           .build();
 
       broker.start();
