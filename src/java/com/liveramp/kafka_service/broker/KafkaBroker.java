@@ -17,7 +17,9 @@ import com.liveramp.kafka_service.zookeeper.ZKEnv;
 
 public class KafkaBroker {
   private static final Logger LOG = LoggerFactory.getLogger(KafkaBroker.class);
-  private static final int DEFAULT_PORT = 9092;
+
+  public static final int DEFAULT_PORT = 9092;
+
   private final int brokerId;
   private final KafkaServer server;
 
@@ -42,9 +44,10 @@ public class KafkaBroker {
     private final int brokerId;
     private final Properties properties;
 
-    private Builder(int brokerId) {
+    private Builder(int brokerId, String hostname) {
       this.brokerId = brokerId;
       this.properties = new Properties();
+      setProperty("advertised.host.name", hostname);
       setProperty("num.network.threads", 3);
       setProperty("num.io.threads", 8);
       setProperty("socket.send.buffer.bytes", 102400);
@@ -112,7 +115,7 @@ public class KafkaBroker {
     LoggingHelper.setLoggingProperties("broker");
     AlertsHandler alertHandler = AlertsHandlers.distribution(KafkaBroker.class);
     try {
-      final KafkaBroker broker = new Builder(brokerId)
+      final KafkaBroker broker = new Builder(brokerId, "localhost")
           .setZookeeperConnect(ZKEnv.TEST_ZKS)
           .setPort(DEFAULT_PORT)
           .setDeleteTopicEnable(true)
@@ -120,10 +123,11 @@ public class KafkaBroker {
           .build();
 
       broker.start();
+      System.out.println("Started kafka broker " + brokerId);
 
       Runtime.getRuntime().addShutdownHook(new ShutdownHook(broker));
     } catch (Exception e) {
-      alertHandler.sendAlert("Exception in Kafka Broker " + brokerId, e,
+      alertHandler.sendAlert("Exception starting Kafka Broker " + brokerId, e,
           AlertRecipients.of("yjin@liveramp.com"), AlertRecipients.of("ltu@liveramp.com"), AlertRecipients.of("syan@liveramp.com"));
     }
 

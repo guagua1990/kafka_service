@@ -23,6 +23,10 @@ public class ZookeeperClient {
     return zkClient;
   }
 
+  public void close() {
+    zkClient.close();
+  }
+
   public boolean createAndPersistNewPath(String path) {
     if (!zkClient.exists(path)) {
       zkClient.createPersistent(path);
@@ -62,5 +66,6 @@ public class ZookeeperClient {
   public static void main(String[] args) {
     ZookeeperClient client = new Builder(ZKEnv.TEST_ZKS).build();
     System.out.println(ZkFs.prettyPrintTree(ZkFs.readingCurrentFs(client.get(), new ZkFs.Directory("/"))));
+    client.close();
   }
 }
