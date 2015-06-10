@@ -1,15 +1,7 @@
 package com.liveramp.kafka_service.producer;
 
-import java.io.FileNotFoundException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
-import com.liveramp.kafka_service.producer.config.YamlProducerConfigBuilder;
-import com.liveramp.kafka_service.broker.KafkaTopicHelper;
-import com.liveramp.kafka_service.zookeeper.ZKEnv;
-import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
 import com.rapleaf.spruce_lib.log.EntryLogger;
 import com.rapleaf.spruce_lib.log.SpruceLogEntry;
 
@@ -40,26 +32,4 @@ public class KafkaLoggerStressTest {
     }
   }
 
-  public static void main(String[] args) throws InterruptedException, FileNotFoundException {
-    ZookeeperClient zookeeperClient = new ZookeeperClient.Builder(ZKEnv.TEST_ZKS).build();
-
-    KafkaTopicHelper helper = KafkaTopicHelper.create(zookeeperClient);
-    if (!helper.getTopics().contains(AttributionLogGenerator.GOOD_REQUEST_CATEGORY)) {
-      helper.createTopic(AttributionLogGenerator.GOOD_REQUEST_CATEGORY);
-      System.out.println("create new topic");
-    }
-    System.out.println(helper.getTopics());
-
-    KafkaLogger logger = new KafkaLogger(YamlProducerConfigBuilder.buildFromYaml("config/producer.yaml"), null);
-
-    ExecutorService service = Executors.newFixedThreadPool(8);
-
-    for (int i = 0; i < 1000; i++) {
-      service.submit(new WriteLogs(logger, 10));
-    }
-
-    service.shutdown();
-    service.awaitTermination(10, TimeUnit.SECONDS);
-    logger.close();
-  }
 }

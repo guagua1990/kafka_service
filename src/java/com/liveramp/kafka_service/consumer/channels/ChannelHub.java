@@ -18,18 +18,14 @@ import java.util.Set;
 
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
-import kafka.producer.ProducerConfig;
 
 import com.liveramp.kafka_service.consumer.ConsumerConstants;
 import com.liveramp.kafka_service.consumer.utils.StatsSummer;
-import com.liveramp.kafka_service.producer.config.SyncProducerConfigBuilder;
-import com.liveramp.kafka_service.producer.serializer.DefaultStringEncoder;
 
 public class ChannelHub implements Runnable {
   private static final String clientChannel = "clientChannel";
   private static final String serverChannel = "serverChannel";
   private static final String channelType = "channelType";
-
 
 
   private final Producer<String, String> producer;
@@ -41,15 +37,8 @@ public class ChannelHub implements Runnable {
   }
 
   private static Producer<String, String> getProducer() {
-    ProducerConfig config = new SyncProducerConfigBuilder(new DefaultStringEncoder())
-        .addBroker("s2s-data-syncer00", 9092)
-        .addBroker("s2s-data-syncer01", 9092)
-        .addBroker("s2s-data-syncer02", 9092)
-        .addBroker("s2s-data-syncer03", 9092)
-        .addBroker("s2s-data-syncer04", 9092)
-        .build();
 
-    return new Producer<String, String>(config);
+    return null;
   }
 
   /**
@@ -94,7 +83,7 @@ public class ChannelHub implements Runnable {
       properties.put(channelType, serverChannel);
       socketServerSelectionKey.attach(properties);
       // wait for the selected keys
-      for (;;) {
+      for (; ; ) {
 
         // the select method is a blocking method which returns when atleast
         // one of the registered
