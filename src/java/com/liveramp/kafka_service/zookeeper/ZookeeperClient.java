@@ -27,11 +27,24 @@ public class ZookeeperClient {
     zkClient.close();
   }
 
-  public boolean createAndPersistNewPath(String path) {
-    if (!zkClient.exists(path)) {
-      zkClient.createPersistent(path);
+  public boolean createNode(String node) {
+    if (!zkClient.exists(node)) {
+      zkClient.createPersistent(node, true);
       return true;
     }
+
+    return false;
+  }
+
+  public boolean deleteNode(String node, boolean recursive) {
+    if (zkClient.exists(node)) {
+      if (recursive) {
+        return zkClient.deleteRecursive(node);
+      } else {
+        return zkClient.delete(node);
+      }
+    }
+
     return false;
   }
 
@@ -65,6 +78,9 @@ public class ZookeeperClient {
 
   public static void main(String[] args) {
     ZookeeperClient client = new Builder(ZKEnv.getZKInstances()).build();
+    client.createMessage("/consumers/new/1", "3");
+    System.out.println(ZkFs.prettyPrintTree(ZkFs.readingCurrentFs(client.get(), new ZkFs.Directory("/"))));
+    client.updateMessage("/consumers/new/1", "4");
     System.out.println(ZkFs.prettyPrintTree(ZkFs.readingCurrentFs(client.get(), new ZkFs.Directory("/"))));
     client.close();
   }
