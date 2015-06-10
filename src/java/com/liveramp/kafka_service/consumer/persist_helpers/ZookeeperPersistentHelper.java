@@ -26,12 +26,16 @@ public class ZookeeperPersistentHelper implements PersistentHelper {
 
   @Override
   public boolean persistOffset(final TopicPartition partition, final long offset) {
-    return false;
+    return zookeeperClient.deleteNode(partition.toString(), true) && zookeeperClient.createNode(partition.toString() + "/" + offset);
   }
 
   @Override
   public boolean persistOffsets(final Map<TopicPartition, Long> topicPartitionOffsets) {
-    return false;
+    boolean success = true;
+    for (Map.Entry<TopicPartition, Long> entry : topicPartitionOffsets.entrySet()) {
+      success = success && persistOffset(entry.getKey(), entry.getValue());
+    }
+    return success;
   }
 
   @Override
