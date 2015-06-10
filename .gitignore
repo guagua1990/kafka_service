@@ -1,3 +1,7 @@
+# Zookeeper and Kafka
+logs/
+log/
+
 # IntelliJ
 .DS_Store
 .idea
@@ -12,7 +16,6 @@ build/
 *.war
 *.ear
 hs_err_pid*
-logs/
 
 # Ignore the default SQLite database.
 /db/*.sqlite3
