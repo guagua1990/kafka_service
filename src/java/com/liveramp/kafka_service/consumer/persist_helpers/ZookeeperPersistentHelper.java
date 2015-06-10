@@ -3,6 +3,7 @@ package com.liveramp.kafka_service.consumer.persist_helpers;
 import java.util.Collection;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.apache.kafka.common.TopicPartition;
 
 import com.liveramp.kafka_service.zookeeper.ZKEnv;
@@ -40,11 +41,17 @@ public class ZookeeperPersistentHelper implements PersistentHelper {
 
   @Override
   public Long retrieveOffset(final TopicPartition partition) {
-    return null;
+    return Long.valueOf(zookeeperClient.readNode(partition.toString()).get(0));
   }
 
   @Override
   public Map<TopicPartition, Long> retrieveOffsets(final Collection<TopicPartition> partitions) {
-    return null;
+    Map<TopicPartition, Long> topicPartitionOffsets = Maps.newHashMap();
+
+    for (TopicPartition partition : partitions) {
+      topicPartitionOffsets.put(partition, retrieveOffset(partition));
+    }
+
+    return topicPartitionOffsets;
   }
 }
