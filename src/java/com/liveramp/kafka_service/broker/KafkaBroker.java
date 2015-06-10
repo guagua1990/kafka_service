@@ -9,9 +9,6 @@ import kafka.utils.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liveramp.java_support.alerts_handler.AlertsHandler;
-import com.liveramp.java_support.alerts_handler.AlertsHandlers;
-import com.liveramp.java_support.alerts_handler.recipients.AlertRecipients;
 import com.liveramp.java_support.logging.LoggingHelper;
 import com.liveramp.kafka_service.zookeeper.ZKEnv;
 
@@ -106,18 +103,17 @@ public class KafkaBroker {
   }
 
   public static void main(String[] args) {
-    if (args.length != 1) {
-      System.out.println("Usage: broker_id");
+    if (args.length < 1) {
+      System.out.println("Usage: broker_id <port>");
       return;
-
     }
+
     int brokerId = Integer.valueOf(args[0]);
     LoggingHelper.setLoggingProperties("broker");
-    AlertsHandler alertHandler = AlertsHandlers.distribution(KafkaBroker.class);
     try {
       final KafkaBroker broker = new Builder(brokerId, "localhost")
           .setZookeeperConnect(ZKEnv.getZKInstances())
-          .setPort(DEFAULT_PORT)
+          .setPort(args.length > 1 ? Integer.valueOf(args[1]) : DEFAULT_PORT)
           .setDeleteTopicEnable(true)
           .setLogDirs("/tmp/kafka-logs/" + brokerId)
           .build();
@@ -127,8 +123,8 @@ public class KafkaBroker {
 
       Runtime.getRuntime().addShutdownHook(new ShutdownHook(broker));
     } catch (Exception e) {
-      alertHandler.sendAlert("Exception starting Kafka Broker " + brokerId, e,
-          AlertRecipients.of("yjin@liveramp.com"), AlertRecipients.of("ltu@liveramp.com"), AlertRecipients.of("syan@liveramp.com"));
+      System.out.println("Exception to start broker " + brokerId);
+      System.out.println(e);
     }
 
   }

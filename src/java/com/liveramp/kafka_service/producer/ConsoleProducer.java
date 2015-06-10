@@ -17,7 +17,7 @@ public class ConsoleProducer extends StringProducer {
 
   public static void main(String[] args) throws IOException {
     if (args.length < 1) {
-      System.out.println("Usage: <brokerhost:port,broker:port...>");
+      System.out.println("Usage: brokerhost:port,broker:port...");
       return;
     }
     ZookeeperClient client = new ZookeeperClient.Builder(ZKEnv.getZKInstances()).build();

@@ -48,7 +48,7 @@ public class StringProducer extends BaseProducer<String, String> {
 
   public static void main(String[] args) throws IOException {
     if (args.length < 3) {
-      System.out.println("Usage: <brokerhost:port,broker:port...> <topic> <messages...>");
+      System.out.println("Usage: brokerhost:port,broker:port topic messages...");
       return;
     }
 
