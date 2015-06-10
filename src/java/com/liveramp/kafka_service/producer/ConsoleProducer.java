@@ -6,8 +6,8 @@ import java.io.InputStreamReader;
 import java.util.Properties;
 
 import com.liveramp.kafka_service.broker.TopicHelper;
-import com.liveramp.kafka_service.zookeeper.ZKEnv;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
+import com.liveramp.kafka_service.zookeeper.ZookeeperEnv;
 
 public class ConsoleProducer extends StringProducer {
 
@@ -20,10 +20,10 @@ public class ConsoleProducer extends StringProducer {
       System.out.println("Usage: brokerhost:port,broker:port...");
       return;
     }
-    ZookeeperClient client = new ZookeeperClient.Builder(ZKEnv.getZKInstances()).build();
+    ZookeeperClient client = new ZookeeperClient.Builder(ZookeeperEnv.getZKInstances()).build();
     System.out.println("Current available topics on kafka:");
     System.out.println(TopicHelper.getAllTopics(client));
-    StringProducer producer = new StringProducer(createConfig("console-producer", args[0], 1000));
+    StringProducer producer = new StringProducer(createConfig("console-producer", args[0], 10000));
 
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 

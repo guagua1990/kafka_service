@@ -58,8 +58,8 @@ public class ZookeeperClient {
     private int sessionTimeout = DEFAULT_SESSION_TIMEOUT_MILLIS;
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT_MILLIS;
 
-    public Builder(EnumSet<ZKEnv.ZKEnsembles> zkEnsembleses) {
-      this(ZKEnv.getZkClientConnections(zkEnsembleses));
+    public Builder(EnumSet<ZookeeperEnv.ZKEnsembles> zkEnsembleses) {
+      this(ZookeeperEnv.getZkClientConnections(zkEnsembleses));
     }
 
     public Builder(String connections) {
@@ -82,13 +82,8 @@ public class ZookeeperClient {
   }
 
   public static void main(String[] args) {
-    ZookeeperClient client = new Builder(ZKEnv.getZKInstances()).build();
-    client.deleteNode("/consumers/new/1", true);
-    client.createNode("/consumers/new/1/3");
-    System.out.println(ZkFs.prettyPrintTree(ZkFs.readingCurrentFs(client.get(), new ZkFs.Directory("/"))));
-    client.deleteNode("/consumers/new/1/3", true);
-    client.createNode("/consumers/new/1/4");
-    System.out.println(ZkFs.prettyPrintTree(ZkFs.readingCurrentFs(client.get(), new ZkFs.Directory("/"))));
+    ZookeeperClient client = new Builder(ZookeeperEnv.getZKInstances()).build();
+    System.out.println(ZookeeperFs.prettyPrintTree(ZookeeperFs.readingCurrentFs(client.get(), new ZookeeperFs.Directory("/"))));
     client.close();
   }
 }
