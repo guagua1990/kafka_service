@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.apache.kafka.common.TopicPartition;
 
-import com.liveramp.kafka_service.zookeeper.ZKEnv;
+import com.liveramp.kafka_service.zookeeper.ZookeeperEnv;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
 
 public class ZookeeperPersistentHelper implements PersistentHelper {
@@ -17,11 +17,11 @@ public class ZookeeperPersistentHelper implements PersistentHelper {
   }
 
   public static ZookeeperPersistentHelper createProductionHelper() {
-    return new ZookeeperPersistentHelper(new ZookeeperClient.Builder(ZKEnv.PRODUCTION_ZKS).build());
+    return new ZookeeperPersistentHelper(new ZookeeperClient.Builder(ZookeeperEnv.PRODUCTION_ZKS).build());
   }
 
   public static ZookeeperPersistentHelper createTestHelper() {
-    return new ZookeeperPersistentHelper(new ZookeeperClient.Builder(ZKEnv.TEST_ZKS).build());
+    return new ZookeeperPersistentHelper(new ZookeeperClient.Builder(ZookeeperEnv.TEST_ZKS).build());
   }
 
   @Override
