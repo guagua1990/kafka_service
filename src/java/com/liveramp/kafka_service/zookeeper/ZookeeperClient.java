@@ -1,6 +1,7 @@
 package com.liveramp.kafka_service.zookeeper;
 
 import java.util.EnumSet;
+import java.util.List;
 
 import kafka.utils.ZKStringSerializer$;
 import org.I0Itec.zkclient.ZkClient;
@@ -34,6 +35,10 @@ public class ZookeeperClient {
     }
 
     return false;
+  }
+
+  public List<String> readNode(String node) {
+    return zkClient.getChildren(node);
   }
 
   public boolean deleteNode(String node, boolean recursive) {
