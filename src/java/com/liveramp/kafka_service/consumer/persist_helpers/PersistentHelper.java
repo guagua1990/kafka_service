@@ -1,4 +1,4 @@
-package com.liveramp.kafka_service.consumer.rebalance_callbacks;
+package com.liveramp.kafka_service.consumer.persist_helpers;
 
 import java.util.Collection;
 import java.util.Map;

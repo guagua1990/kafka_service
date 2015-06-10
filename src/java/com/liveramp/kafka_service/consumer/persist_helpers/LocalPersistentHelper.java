@@ -1,4 +1,4 @@
-package com.liveramp.kafka_service.consumer.rebalance_callbacks;
+package com.liveramp.kafka_service.consumer.persist_helpers;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -24,7 +24,6 @@ public class LocalPersistentHelper implements PersistentHelper {
   public static LocalPersistentHelper create(final String workingDirectory) {
     return new LocalPersistentHelper(workingDirectory);
   }
-
 
   @Override
   public boolean persistOffset(final TopicPartition partition, final long offset) {

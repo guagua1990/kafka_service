@@ -6,6 +6,8 @@ import java.util.Map;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.TopicPartition;
 
+import com.liveramp.kafka_service.consumer.persist_helpers.PersistentHelper;
+
 abstract class AbstractRebalanceCallback implements LiverampRebalanceCallback {
 
   private PersistentHelper persistentHelper;

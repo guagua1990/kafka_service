@@ -1,5 +1,7 @@
 package com.liveramp.kafka_service.consumer.rebalance_callbacks;
 
+import com.liveramp.kafka_service.consumer.persist_helpers.LocalPersistentHelper;
+
 public class LocalRebalanceCallback extends AbstractRebalanceCallback {
 
   private LocalRebalanceCallback(final String workingDirectory) {
