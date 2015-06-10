@@ -15,7 +15,7 @@ public class KafkaLogger implements EntryLogger {
   private final Double perfLogRate;
 
   public KafkaLogger(ProducerConfig config, Double perfLogRate) {
-    this.producer = new Producer<String, String>(config);
+    this.producer = new Producer<>(config);
     this.perfLogRate = perfLogRate;
   }
 
