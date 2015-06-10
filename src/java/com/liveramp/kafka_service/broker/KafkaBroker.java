@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liveramp.java_support.logging.LoggingHelper;
-import com.liveramp.kafka_service.zookeeper.ZKEnv;
+import com.liveramp.kafka_service.zookeeper.ZookeeperEnv;
 
 public class KafkaBroker {
   private static final Logger LOG = LoggerFactory.getLogger(KafkaBroker.class);
@@ -74,8 +74,8 @@ public class KafkaBroker {
       return setProperty("delete.topic.enable", deleteTopicEnable);
     }
 
-    public Builder setZookeeperConnect(EnumSet<ZKEnv.ZKEnsembles> zks) {
-      return setZookeeperConnect(ZKEnv.getZkClientConnections(zks));
+    public Builder setZookeeperConnect(EnumSet<ZookeeperEnv.ZKEnsembles> zks) {
+      return setZookeeperConnect(ZookeeperEnv.getZkClientConnections(zks));
     }
 
     public Builder setZookeeperConnect(String zkConnect) {
@@ -112,7 +112,7 @@ public class KafkaBroker {
     LoggingHelper.setLoggingProperties("broker");
     try {
       final KafkaBroker broker = new Builder(brokerId, "localhost")
-          .setZookeeperConnect(ZKEnv.getZKInstances())
+          .setZookeeperConnect(ZookeeperEnv.getZKInstances())
           .setPort(args.length > 1 ? Integer.valueOf(args[1]) : DEFAULT_PORT)
           .setDeleteTopicEnable(true)
           .setLogDirs("/tmp/kafka-logs/" + brokerId)

@@ -42,40 +42,40 @@ public class ZookeeperServers {
   }
 
   public static Set<ExecutorService> startProductionZk(int id) throws IOException {
-    ZKEnv.ZKEnsembles server = null;
+    ZookeeperEnv.ZKEnsembles server = null;
     switch (id) {
       case 0:
-        server = ZKEnv.ZKEnsembles.SERVER_0;
+        server = ZookeeperEnv.ZKEnsembles.SERVER_0;
         break;
       case 1:
-        server = ZKEnv.ZKEnsembles.SERVER_1;
+        server = ZookeeperEnv.ZKEnsembles.SERVER_1;
         break;
       case 2:
-        server = ZKEnv.ZKEnsembles.SERVER_2;
+        server = ZookeeperEnv.ZKEnsembles.SERVER_2;
         break;
       case 3:
-        server = ZKEnv.ZKEnsembles.SERVER_3;
+        server = ZookeeperEnv.ZKEnsembles.SERVER_3;
         break;
       case 4:
-        server = ZKEnv.ZKEnsembles.SERVER_4;
+        server = ZookeeperEnv.ZKEnsembles.SERVER_4;
         break;
       default:
         throw new IllegalArgumentException("invalid zookeeper id " + id);
     }
-    return Collections.singleton(startFromEnsembles(server, DEFAULT_WORKING_DIR, ZKEnv.PRODUCTION_ZKS));
+    return Collections.singleton(startFromEnsembles(server, DEFAULT_WORKING_DIR, ZookeeperEnv.PRODUCTION_ZKS));
 
   }
 
   public static Set<ExecutorService> startTestZks() throws IOException {
     Set<ExecutorService> services = Sets.newHashSet();
-    for (ZKEnv.ZKEnsembles sever : ZKEnv.TEST_ZKS) {
-      services.add(startFromEnsembles(sever, DEFAULT_WORKING_DIR + "/zk" + sever.getId(), ZKEnv.TEST_ZKS));
+    for (ZookeeperEnv.ZKEnsembles sever : ZookeeperEnv.TEST_ZKS) {
+      services.add(startFromEnsembles(sever, DEFAULT_WORKING_DIR + "/zk" + sever.getId(), ZookeeperEnv.TEST_ZKS));
       System.out.println(String.format("Starting service %d on %s", sever.getId(), sever.getHostClientPort()));
     }
     return services;
   }
 
-  public static ExecutorService startFromEnsembles(ZKEnv.ZKEnsembles zookeeper, String workingDir, EnumSet<ZKEnv.ZKEnsembles> ensembles) throws IOException {
+  public static ExecutorService startFromEnsembles(ZookeeperEnv.ZKEnsembles zookeeper, String workingDir, EnumSet<ZookeeperEnv.ZKEnsembles> ensembles) throws IOException {
     if (!ensembles.contains(zookeeper)) {
       throw new IllegalArgumentException("This ensemble " + zookeeper + " doesn't belong to the working set " + ensembles);
     }
@@ -90,7 +90,7 @@ public class ZookeeperServers {
     }
 
     final Builder serverBuilder = new Builder(zookeeper.getClientPort(), workingDir);
-    for (ZKEnv.ZKEnsembles server : ensembles) {
+    for (ZookeeperEnv.ZKEnsembles server : ensembles) {
       serverBuilder.addServer(server.getId(), server.getHostPorts());
     }
     LOG.info("starting zookeeper {} in {}", id, workingDir);
@@ -158,8 +158,8 @@ public class ZookeeperServers {
       this.properties = new Properties();
       setWorkingDir(workingDir);
       setClientPort(clientPort);
-      setInitLimit(ZKEnv.INIT_LIMIT);
-      setSyncLimit(ZKEnv.SYNC_LIMIT);
+      setInitLimit(ZookeeperEnv.INIT_LIMIT);
+      setSyncLimit(ZookeeperEnv.SYNC_LIMIT);
     }
 
     public Builder(Properties properties) {

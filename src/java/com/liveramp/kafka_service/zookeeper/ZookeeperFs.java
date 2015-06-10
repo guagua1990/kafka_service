@@ -7,10 +7,10 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import org.I0Itec.zkclient.ZkClient;
 
-public class ZkFs {
+public class ZookeeperFs {
 
-  private ZkFs() {
-    throw new AssertionError("Can not instantiate ZkFs");
+  private ZookeeperFs() {
+    throw new AssertionError("Can not instantiate ZookeeperFs");
   }
 
   public static Directory readingCurrentFs(ZkClient zkClient, Directory parent) {

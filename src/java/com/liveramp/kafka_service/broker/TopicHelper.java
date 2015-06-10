@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.collection.Iterator;
 
-import com.liveramp.kafka_service.zookeeper.ZKEnv;
+import com.liveramp.kafka_service.zookeeper.ZookeeperEnv;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
 
 public class TopicHelper {
@@ -68,7 +68,7 @@ public class TopicHelper {
   }
 
   public static void main(String[] args) throws IOException {
-    ZookeeperClient client = new ZookeeperClient.Builder(ZKEnv.getZKInstances()).build();
+    ZookeeperClient client = new ZookeeperClient.Builder(ZookeeperEnv.getZKInstances()).build();
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
     System.out.println("please enter the command:");

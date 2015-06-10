@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
-public class ZKEnv {
+public class ZookeeperEnv {
 
   // the number of ticks that the initial synchronization phase can take
   public static final int INIT_LIMIT = 10;
@@ -40,7 +40,7 @@ public class ZKEnv {
 
   public static String getZkClientConnections(EnumSet<ZKEnsembles> zks) {
     List<String> conns = Lists.newArrayList();
-    for (ZKEnv.ZKEnsembles ensembles : zks) {
+    for (ZookeeperEnv.ZKEnsembles ensembles : zks) {
       conns.add(ensembles.getHostClientPort());
     }
     return Joiner.on(",").join(conns);
@@ -98,7 +98,7 @@ public class ZKEnv {
     }
   }
 
-  private ZKEnv() {
+  private ZookeeperEnv() {
     throw new AssertionError("Never be instantiated");
   }
 }
