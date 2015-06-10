@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.apache.kafka.common.TopicPartition;
 
-public interface PersistentHelper {
+public interface KafkaOffsetHelper {
 
   public boolean persistOffset(final TopicPartition partition, final long offset);
 
