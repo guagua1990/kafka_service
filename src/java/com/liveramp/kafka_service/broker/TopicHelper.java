@@ -69,19 +69,26 @@ public class TopicHelper {
     ZookeeperClient client = new ZookeeperClient.Builder(ZookeeperEnv.getZKInstances()).build();
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-    System.out.println("please enter the command:");
+    System.out.println("Please enter the topic command:");
+    System.out.print("kafka >");
     String command = null;
     while ((command = br.readLine()) != null) {
       if (command.startsWith("create")) {
-        String topic = command.split(" ")[1];
-        createTopic(client, topic);
-        System.out.println("created topic " + topic);
+        String[] ops = command.split(" ");
+        if (ops.length < 1) {
+          System.out.println("Usage: create topic <num_partition> <num_replica>");
+        }
+        String topic = ops[1];
+        int partitions = ops.length > 1 ? Integer.valueOf(ops[2]) : 1;
+        int replicas = ops.length > 2 ? Integer.valueOf(ops[3]) : 1;
+        createTopic(client, topic, partitions, replicas);
+        System.out.println("Created topic " + topic);
       } else if (command.equals("list")) {
         System.out.println(getAllTopics(client));
       } else if (command.startsWith("delete")) {
         String topic = command.split(" ")[1];
         deleteTopic(client, topic);
-        System.out.println("deleted topic " + topic);
+        System.out.println("Deleted topic " + topic);
       } else if (command.startsWith("describe")) {
         String topic = command.split(" ")[1];
         System.out.println(getDescription(client, topic));
@@ -90,6 +97,7 @@ public class TopicHelper {
       } else {
         System.out.println("No such command: " + command);
       }
+      System.out.print("kafka >");
     }
     client.close();
   }
