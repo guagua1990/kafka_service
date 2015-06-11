@@ -1,6 +1,7 @@
 package com.liveramp.kafka_service.consumer.persist_helpers;
 
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -9,20 +10,16 @@ import org.apache.kafka.common.TopicPartition;
 import com.liveramp.kafka_service.zookeeper.ZookeeperClient;
 import com.liveramp.kafka_service.zookeeper.ZookeeperEnv;
 
-public class ZookeeperPersistentHelper implements PersistentHelper {
+public class ZookeeperKafkaOffsetHelper implements KafkaOffsetHelper {
 
   private final ZookeeperClient zookeeperClient;
 
-  private ZookeeperPersistentHelper(final ZookeeperClient zookeeperClient) {
-    this.zookeeperClient = zookeeperClient;
+  private ZookeeperKafkaOffsetHelper(final EnumSet<ZookeeperEnv.ZKEnsembles> zkEnsembles) {
+    this.zookeeperClient = new ZookeeperClient.Builder(zkEnsembles).build();
   }
 
-  public static ZookeeperPersistentHelper createProductionHelper() {
-    return new ZookeeperPersistentHelper(new ZookeeperClient.Builder(ZookeeperEnv.PRODUCTION_ZKS).build());
-  }
-
-  public static ZookeeperPersistentHelper createTestHelper() {
-    return new ZookeeperPersistentHelper(new ZookeeperClient.Builder(ZookeeperEnv.TEST_ZKS).build());
+  public static ZookeeperKafkaOffsetHelper create(final EnumSet<ZookeeperEnv.ZKEnsembles> zkEnsembles) {
+    return new ZookeeperKafkaOffsetHelper(zkEnsembles);
   }
 
   @Override

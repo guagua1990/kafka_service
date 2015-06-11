@@ -11,18 +11,18 @@ import com.google.common.collect.Maps;
 import org.apache.kafka.common.TopicPartition;
 import org.jvyaml.YAML;
 
-public class LocalPersistentHelper implements PersistentHelper {
+public class LocalKafkaOffsetHelper implements KafkaOffsetHelper {
 
   private static final String PARTITION_KEY = "PK";
 
   private final String workingDirectory;
 
-  private LocalPersistentHelper(final String workingDirectory) {
+  private LocalKafkaOffsetHelper(final String workingDirectory) {
     this.workingDirectory = workingDirectory;
   }
 
-  public static LocalPersistentHelper create(final String workingDirectory) {
-    return new LocalPersistentHelper(workingDirectory);
+  public static LocalKafkaOffsetHelper create(final String workingDirectory) {
+    return new LocalKafkaOffsetHelper(workingDirectory);
   }
 
   @Override
