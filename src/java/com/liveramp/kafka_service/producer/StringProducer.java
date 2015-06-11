@@ -36,15 +36,6 @@ public class StringProducer extends BaseProducer<String, String> {
     return messageRescueStrategy;
   }
 
-  public static Properties createConfig(String producerName, String brokers, int timeout) {
-    ProducerConfigBuilder builder = new ProducerConfigBuilder(producerName);
-    for (String broker : brokers.split(",")) {
-      String[] hostport = broker.split(":");
-      builder.addBroker(hostport[0], Integer.valueOf(hostport[1]));
-    }
-
-    return builder.setTimeout(timeout).build();
-  }
 
   public static void main(String[] args) throws IOException {
     if (args.length < 3) {
@@ -52,7 +43,7 @@ public class StringProducer extends BaseProducer<String, String> {
       return;
     }
 
-    StringProducer producer = new StringProducer(createConfig("simple-string-producer", args[0], 100));
+    StringProducer producer = new StringProducer(ProducerConfigBuilder.createConfig("simple-string-producer", args[0], 100));
 
     String topic = args[1];
     for (int i = 2; i < args.length; i++) {

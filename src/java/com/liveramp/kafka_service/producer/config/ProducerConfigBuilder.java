@@ -111,4 +111,13 @@ public class ProducerConfigBuilder {
     return properties;
   }
 
+  public static Properties createConfig(String producerName, String brokers, int timeout) {
+    ProducerConfigBuilder builder = new ProducerConfigBuilder(producerName);
+    for (String broker : brokers.split(",")) {
+      String[] hostport = broker.split(":");
+      builder.addBroker(hostport[0], Integer.valueOf(hostport[1]));
+    }
+
+    return builder.setTimeout(timeout).build();
+  }
 }
