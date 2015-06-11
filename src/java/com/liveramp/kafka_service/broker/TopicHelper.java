@@ -79,8 +79,8 @@ public class TopicHelper {
           System.out.println("Usage: create topic <num_partition> <num_replica>");
         }
         String topic = ops[1];
-        int partitions = ops.length > 1 ? Integer.valueOf(ops[2]) : 1;
-        int replicas = ops.length > 2 ? Integer.valueOf(ops[3]) : 1;
+        int partitions = ops.length > 2 ? Integer.valueOf(ops[2]) : 1;
+        int replicas = ops.length > 3 ? Integer.valueOf(ops[3]) : 1;
         createTopic(client, topic, partitions, replicas);
         System.out.println("Created topic " + topic);
       } else if (command.equals("list")) {
