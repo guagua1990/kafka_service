@@ -24,9 +24,6 @@ import org.apache.zookeeper.server.quorum.QuorumPeerMain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liveramp.java_support.alerts_handler.AlertsHandler;
-import com.liveramp.java_support.alerts_handler.InMemoryAlertsHandler;
-import com.liveramp.java_support.alerts_handler.recipients.AlertRecipients;
 import com.liveramp.java_support.logging.LoggingHelper;
 import com.rapleaf.support.thread.NamedThreadFactory;
 
@@ -244,7 +241,6 @@ public class ZookeeperServers {
 
   public static void main(String[] args) {
     LoggingHelper.setLoggingProperties("zookeeper");
-    AlertsHandler alertHandler = new InMemoryAlertsHandler();
     String option = args[0];
 
     Set<ExecutorService> services = Sets.newHashSet();
@@ -257,7 +253,7 @@ public class ZookeeperServers {
         throw new IllegalArgumentException("No " + option + " available");
       }
     } catch (Exception e) {
-      alertHandler.sendAlert("fail to start server", e, AlertRecipients.of("yjin@liveramp.com"));
+      System.out.println("Fail to start server");
     } finally {
       Runtime.getRuntime().addShutdownHook(new ShutdownHook(services));
     }
