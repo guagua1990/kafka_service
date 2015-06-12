@@ -219,10 +219,10 @@ public class ZookeeperServers {
     }
   }
 
-  private static class ShutdownHook extends Thread {
+  public static class ShutdownHook extends Thread {
     private final Set<ExecutorService> runningServices;
 
-    private ShutdownHook(Set<ExecutorService> runningServices) {
+    public ShutdownHook(Set<ExecutorService> runningServices) {
       this.runningServices = runningServices;
     }
 
