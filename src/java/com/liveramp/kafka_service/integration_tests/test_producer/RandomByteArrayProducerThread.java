@@ -1,4 +1,4 @@
-package com.liveramp.kafka_service.producer.test_producer;
+package com.liveramp.kafka_service.integration_tests.test_producer;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,7 +20,7 @@ public class RandomByteArrayProducerThread extends Thread {
   private static String BROKERS_URL = "s2s-data-syncer00:9092,s2s-data-syncer01:9092,s2s-data-syncer02:9092,s2s-data-syncer03:9092,s2s-data-syncer04:9092";
   private static String TOPIC = "byte_array-test";
   private static int N_THREADS = 10;
-  private static int N_RECORDS = 1000 * 1000;
+  private static int N_RECORDS = 1000;
 
   public RandomByteArrayProducerThread(ByteArrayProducer producer, String topic, int numRecords) {
     this.producer = producer;

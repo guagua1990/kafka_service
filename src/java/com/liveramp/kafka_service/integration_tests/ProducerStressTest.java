@@ -2,6 +2,8 @@ package com.liveramp.kafka_service.integration_tests;
 
 import java.util.Properties;
 
+import com.google.gson.Gson;
+
 import com.liveramp.kafka_service.producer.StringProducer;
 import com.liveramp.kafka_service.producer.config.ProducerConfigBuilder;
 
@@ -22,7 +24,8 @@ public class ProducerStressTest {
     builder.addBroker("s2s-data-syncer04", 9092);
 
 
-
+    Gson gson = new Gson();
+    gson.
   }
 
 }

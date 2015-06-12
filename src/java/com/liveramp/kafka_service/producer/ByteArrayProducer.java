@@ -7,7 +7,7 @@ import com.liveramp.kafka_service.producer.callback.MessageRescueStrategy;
 
 public class ByteArrayProducer extends BaseProducer<byte[], byte[]> {
 
-  private static DiscardedMessageRescueStrategy<byte[], byte[]> messageRescueStrategy = new DiscardedMessageRescueStrategy<>();
+  private static DiscardedMessageRescueStrategy<byte[]> messageRescueStrategy = new DiscardedMessageRescueStrategy<>();
 
   public ByteArrayProducer(Properties config) {
     super(config);
@@ -24,7 +24,7 @@ public class ByteArrayProducer extends BaseProducer<byte[], byte[]> {
   }
 
   @Override
-  protected MessageRescueStrategy<byte[], byte[]> getRescueStrategy() {
+  protected MessageRescueStrategy<byte[]> getRescueStrategy() {
     return messageRescueStrategy;
   }
 }

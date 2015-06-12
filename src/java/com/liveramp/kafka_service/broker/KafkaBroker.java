@@ -101,7 +101,7 @@ public class KafkaBroker {
   }
 
   public static void main(String[] args) {
-    if (args.length < 2) {
+    if (args.length < 1) {
       System.out.println("Usage: broker_id <port>");
       return;
     }

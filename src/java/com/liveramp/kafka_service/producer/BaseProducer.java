@@ -31,7 +31,7 @@ public abstract class BaseProducer<K, V> {
     ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(topic,
         serializeKey(topic, key),
         serializeValue(topic, message));
-    producer.send(record, new ProducerCallback(getRescueStrategy(), record));
+    producer.send(record, new ProducerCallback<>(getRescueStrategy(), topic, message));
   }
 
   public List<PartitionInfo> getPartitionForTopic(String topic) {
@@ -50,22 +50,24 @@ public abstract class BaseProducer<K, V> {
 
   protected abstract byte[] serializeValue(String topic, V value);
 
-  protected abstract MessageRescueStrategy<K, V> getRescueStrategy();
+  protected abstract MessageRescueStrategy<V> getRescueStrategy();
 
-  protected static class ProducerCallback<K, V> implements Callback {
+  protected static class ProducerCallback<V> implements Callback {
 
-    private final MessageRescueStrategy<K, V> messageRescueStrategy;
-    private final ProducerRecord<K, V> record;
+    private final MessageRescueStrategy<V> messageRescueStrategy;
+    private final String topic;
+    private final V message;
 
-    private ProducerCallback(MessageRescueStrategy<K, V> messageRescueStrategy, ProducerRecord<K, V> record) {
+    private ProducerCallback(MessageRescueStrategy<V> messageRescueStrategy, String topic, V message) {
       this.messageRescueStrategy = messageRescueStrategy;
-      this.record = record;
+      this.topic = topic;
+      this.message = message;
     }
 
     @Override
     public void onCompletion(RecordMetadata metadata, Exception exception) {
       if (exception != null && messageRescueStrategy != null) {
-        messageRescueStrategy.rescue(exception, record);
+        messageRescueStrategy.rescue(exception, topic, message);
       }
     }
   }

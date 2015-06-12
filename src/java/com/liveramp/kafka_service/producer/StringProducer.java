@@ -13,7 +13,7 @@ import com.liveramp.kafka_service.producer.config.ProducerConfigBuilder;
 public class StringProducer extends BaseProducer<String, String> {
 
   private final Serializer<String> serializer;
-  private final MessageRescueStrategy<String, String> messageRescueStrategy;
+  private final MessageRescueStrategy<String> messageRescueStrategy;
 
   public StringProducer(Properties properties) {
     super(properties);
@@ -32,7 +32,7 @@ public class StringProducer extends BaseProducer<String, String> {
   }
 
   @Override
-  protected MessageRescueStrategy<String, String> getRescueStrategy() {
+  protected MessageRescueStrategy<String> getRescueStrategy() {
     return messageRescueStrategy;
   }
 
