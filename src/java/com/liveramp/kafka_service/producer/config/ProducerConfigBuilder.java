@@ -22,7 +22,7 @@ public class ProducerConfigBuilder {
   private String compressionType = "none"; // default compression type
   private int retries = 3; // conceptually we don't care about order, so we want retry if meet a transient failure
   private int batchSize = 10000; // default batch size
-  private int timeout = 30 * 1000; // default time out waiting for acks
+  private int timeout = 10 * 1000; // default time out waiting for acks
   private boolean blockOnBufferFull = true; // default to block buffer
   private List<Class<? extends MetricsReporter>> metricsReporters;
 

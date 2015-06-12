@@ -240,9 +240,13 @@ public class ZookeeperServers {
   }
 
   public static void main(String[] args) {
+    if (args.length != 1) {
+      System.out.println("Usage: [PRODUCTION|TEST]");
+      return;
+    }
+
     LoggingHelper.setLoggingProperties("zookeeper");
     String option = args[0];
-
     Set<ExecutorService> services = Sets.newHashSet();
     try {
       if (option.equals("PRODUCTION")) {
@@ -253,7 +257,7 @@ public class ZookeeperServers {
         throw new IllegalArgumentException("No " + option + " available");
       }
     } catch (Exception e) {
-      System.out.println("Fail to start server");
+      System.out.println("Fail to start zookeeper servers");
     } finally {
       Runtime.getRuntime().addShutdownHook(new ShutdownHook(services));
     }

@@ -82,6 +82,7 @@ public class ZookeeperClient {
   }
 
   public static void main(String[] args) {
+    System.out.println("Print out current zookeeper structure");
     ZookeeperClient client = new Builder(ZookeeperEnv.getZKInstances()).build();
     System.out.println(ZookeeperFs.prettyPrintTree(ZookeeperFs.readingCurrentFs(client.get(), new ZookeeperFs.Directory("/"))));
     client.close();

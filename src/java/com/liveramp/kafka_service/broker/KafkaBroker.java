@@ -55,7 +55,7 @@ public class KafkaBroker {
       setProperty("log.dirs", "/tmp/kafka-logs");
       setProperty("num.partitions", 1);
       setProperty("num.recovery.threads.per.data.dir", 1);
-      setProperty("log.retention.hours", 168);
+      setProperty("log.retention.hours", 3 * 24);
       setProperty("log.segment.bytes", 1073741824);
       setProperty("log.retention.check.interval.ms", 300000);
       setProperty("log.cleaner.enable", false);

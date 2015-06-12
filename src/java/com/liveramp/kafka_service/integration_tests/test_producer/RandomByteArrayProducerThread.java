@@ -20,7 +20,7 @@ public class RandomByteArrayProducerThread extends Thread {
   private static String BROKERS_URL = "s2s-data-syncer00:9092,s2s-data-syncer01:9092,s2s-data-syncer02:9092,s2s-data-syncer03:9092,s2s-data-syncer04:9092";
   private static String TOPIC = "byte_array-test";
   private static int N_THREADS = 10;
-  private static int N_RECORDS = 1000;
+  private static int N_RECORDS = 1000 * 1000;
 
   public RandomByteArrayProducerThread(ByteArrayProducer producer, String topic, int numRecords) {
     this.producer = producer;
@@ -42,7 +42,7 @@ public class RandomByteArrayProducerThread extends Thread {
     int numThreads;
     int numRecords;
     if (args.length > 0) {
-      Preconditions.checkArgument(args.length == 4, "Usage: borkersUrl topic_name num_threads num_records_per_thread...");
+      Preconditions.checkArgument(args.length == 4, "Usage: brokersUrl topic_name num_threads num_records_per_thread...");
       brokerUrls = args[0];
       topic = args[1];
       numThreads = Integer.parseInt(args[2]);
