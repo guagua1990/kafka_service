@@ -23,7 +23,7 @@ public class ConsoleProducer extends StringProducer {
     ZookeeperClient client = new ZookeeperClient.Builder(ZookeeperEnv.getZKInstances()).build();
     System.out.println("Current available topics on kafka:");
     System.out.println(TopicHelper.getAllTopics(client));
-    StringProducer producer = new StringProducer(createConfig("console-producer", args[0], 10000));
+    StringProducer producer = new StringProducer(createConfig("console-producer", args[0], 1000));
 
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 

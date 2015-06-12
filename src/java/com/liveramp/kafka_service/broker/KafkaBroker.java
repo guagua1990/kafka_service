@@ -1,5 +1,6 @@
 package com.liveramp.kafka_service.broker;
 
+import java.net.InetAddress;
 import java.util.EnumSet;
 import java.util.Properties;
 
@@ -41,10 +42,11 @@ public class KafkaBroker {
     private final int brokerId;
     private final Properties properties;
 
-    private Builder(int brokerId, String hostname) {
+    private Builder(int brokerId, String hostname, int port) {
       this.brokerId = brokerId;
       this.properties = new Properties();
       setProperty("advertised.host.name", hostname);
+      setProperty("port", String.valueOf(port));
       setProperty("num.network.threads", 3);
       setProperty("num.io.threads", 8);
       setProperty("socket.send.buffer.bytes", 102400);
@@ -60,10 +62,6 @@ public class KafkaBroker {
       setProperty("zookeeper.connection.timeout.ms", 2000);
       setProperty("controlled.shutdown.enabl", true);
       setProperty("broker.id", String.valueOf(brokerId));
-    }
-
-    public Builder setPort(int port) {
-      return setProperty("port", String.valueOf(port));
     }
 
     public Builder setLogDirs(String logDirs) {
@@ -103,7 +101,7 @@ public class KafkaBroker {
   }
 
   public static void main(String[] args) {
-    if (args.length < 1) {
+    if (args.length < 2) {
       System.out.println("Usage: broker_id <port>");
       return;
     }
@@ -111,15 +109,16 @@ public class KafkaBroker {
     int brokerId = Integer.valueOf(args[0]);
     LoggingHelper.setLoggingProperties("broker");
     try {
-      final KafkaBroker broker = new Builder(brokerId, "localhost")
+      String hostname = InetAddress.getLocalHost().getCanonicalHostName();
+      int port = args.length > 1 ? Integer.valueOf(args[1]) : DEFAULT_PORT;
+      final KafkaBroker broker = new Builder(brokerId, hostname, port)
           .setZookeeperConnect(ZookeeperEnv.getZKInstances())
-          .setPort(args.length > 1 ? Integer.valueOf(args[1]) : DEFAULT_PORT)
           .setDeleteTopicEnable(true)
           .setLogDirs("/tmp/kafka-logs/" + brokerId)
           .build();
 
       broker.start();
-      System.out.println("Started kafka broker " + brokerId);
+      System.out.println(String.format("Started kafka broker %d on %s:%d", brokerId, hostname, port));
 
       Runtime.getRuntime().addShutdownHook(new ShutdownHook(broker));
     } catch (Exception e) {

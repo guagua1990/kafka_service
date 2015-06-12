@@ -7,7 +7,7 @@ public class DiscardedMessageRescueStrategy<K, V> implements MessageRescueStrate
   @Override
   public void rescue(Exception e, ProducerRecord<K, V> record) {
     // just discard the message
-    System.out.println("Meet exception " + e.getMessage());
+    System.out.println(String.format("Meet [%s] caused by %s", e.getClass().getCanonicalName(), e.getMessage()));
     System.out.println(String.format("Discarded 1 message {%s} for topic %s", record.value(), record.topic()));
   }
 }
